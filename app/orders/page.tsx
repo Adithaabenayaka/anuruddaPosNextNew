@@ -553,7 +553,7 @@ export default function OrdersPage() {
             {/* Print-only Component */}
             {selectedSale && (
                 <div className="print-only">
-                    <ReceiptPrint sale={selectedSale} bankDetails={currentBankData} />
+                    <ReceiptPrint sale={selectedSale} />
                 </div>
             )}
         </div>

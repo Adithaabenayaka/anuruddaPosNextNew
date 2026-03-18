@@ -74,14 +74,14 @@ export default function SalesPage() {
     const firstAvailableBatch = product.batches?.find(b => b.availableQty > 0);
     const activeBatchId = firstAvailableBatch?.id;
     const selectedBatch = product.batches?.find(b => b.id === activeBatchId);
-    
+
     // Determine the selling price vs original price
     const batchPrice = selectedBatch ? selectedBatch.price : product.price;
     const batchDiscountPrice = selectedBatch ? selectedBatch.discountedPrice : product.discountedPrice;
-    
+
     const itemOriginalPrice = batchPrice;
     const itemPrice = batchDiscountPrice !== undefined && batchDiscountPrice > 0 ? batchDiscountPrice : batchPrice;
-    
+
     const itemAvailableQty = selectedBatch ? selectedBatch.availableQty : product.availableQty;
 
     setCart((prev) => {
@@ -577,7 +577,7 @@ export default function SalesPage() {
                           <p className="font-bold text-gray-900 text-xs">{item.productName}</p>
                           <div className="flex items-center gap-1.5 mt-0.5">
                             {item.originalPrice && item.originalPrice !== item.price && (
-                                <p className="text-[8px] text-gray-400 line-through">Rs. {item.originalPrice.toLocaleString()}</p>
+                              <p className="text-[8px] text-gray-400 line-through">Rs. {item.originalPrice.toLocaleString()}</p>
                             )}
                             <p className="text-[9px] text-gray-600 font-medium">Rs. {item.price.toLocaleString()}</p>
                           </div>

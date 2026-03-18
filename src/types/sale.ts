@@ -4,7 +4,7 @@ export interface SaleItem {
     productId: string; // The custom SKU-XXX ID
     productName: string;
     price: number;
-    originalPrice: number;
+    originalPrice?: number;
     qty: number;
     batchId?: string; // Link to specific product batch
     batchLabel?: string; // Label of the batch at time of sale

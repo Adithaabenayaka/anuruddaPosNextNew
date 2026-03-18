@@ -13,12 +13,12 @@ const ReceiptPrint = ({ sale }: ReceiptPrintProps) => {
 
     const { selectedBankDetail } = useBankDetails();
     const subtotal = sale.items.reduce(
-        (acc, item) => acc + item.originalPrice * item.qty,
+        (acc, item) => acc + (item.originalPrice ?? item.price) * item.qty,
         0
     );
 
     const totalDiscount = sale.items.reduce((acc, item) => {
-        if (item.originalPrice > item.price) {
+        if (item.originalPrice && item.originalPrice > item.price) {
             return acc + (item.originalPrice - item.price) * item.qty;
         }
         return acc;
@@ -109,7 +109,7 @@ const ReceiptPrint = ({ sale }: ReceiptPrintProps) => {
 
                             {/* MRP */}
                             <div className="text-right">
-                                {item.originalPrice > item.price ? (
+                                {item.originalPrice && item.originalPrice > item.price ? (
                                     <span className="line-through text-gray-400">
                                         {formatLKR(item.originalPrice)}
                                     </span>
