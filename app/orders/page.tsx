@@ -1,14 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { CreditCard, Eye, Search, Calendar, ChevronRight, X, Package, Tag, User, MapPin, Loader2, History, DollarSign, CheckCircle2 } from "lucide-react";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { CreditCard, Search, Calendar, ChevronRight, X, Package, User, History, CheckCircle2 } from "lucide-react";
 import ReceiptPrint from "@/src/components/ReceiptPrint";
 import { Sale } from "@/src/types/sale";
 import { useSales } from "@/src/context/SalesContext";
 import GenericTable from "@/src/components/GenericTable";
 import Button from "@/src/components/Button";
-import { allBankDetails } from "@/src/Data/bankDetails";
-import { BankDetails } from "@/src/types/bankDetails";
 
 const formatDateTime = (isoString?: string) => {
     if (!isoString) return "N/A";
@@ -37,9 +35,22 @@ export default function OrdersPage() {
     const [paymentAmount, setPaymentAmount] = useState<string>("");
     const [isProcessingPayment, setIsProcessingPayment] = useState(false);
     const [agingFilter, setAgingFilter] = useState<string>("all");
-    const [currentBankData, setCurrentBankData] = useState<BankDetails>(allBankDetails[0])
 
-    useEffect(() => { console.log(selectedSale) }, [selectedSale])
+    useEffect(() => { console.log(sales) }, [sales])
+
+    const totalDue = sales.reduce((sum, order) => {
+        return sum + (order.balanceAmount || 0);
+    }, 0);
+
+    const totalProfit = sales
+        .filter(sale => sale.status === "completed")
+        .reduce((orderSum, order) => {
+            const orderProfit = order.items.reduce((itemSum, item) => {
+                return itemSum + ((item.price - item.cost) * item.qty);
+            }, 0);
+
+            return orderSum + orderProfit;
+        }, 0);
 
     const fetchSales = useCallback(async () => {
         try {
@@ -309,17 +320,29 @@ export default function OrdersPage() {
                 <footer className="mt-8 flex flex-col lg:flex-row justify-between items-center gap-6 bg-primary-900 text-white p-6 rounded-2xl shadow-xl shadow-primary-200/50">
                     <div className="flex flex-wrap gap-10 items-center justify-center lg:justify-start">
                         <div>
-                            <p className="text-primary-300 text-[10px] font-bold uppercase tracking-widest mb-1">Confirmed Revenue</p>
+                            <p className="text-primary-300 text-[10px] font-bold uppercase tracking-widest mb-1">Total Received</p>
                             <p className="text-xl font-black">
                                 Rs. {totalRevenue.toLocaleString()}
                             </p>
                         </div>
                         <div className="border-l border-primary-800/50 pl-10">
+                            <p className="text-primary-300 text-[10px] font-bold uppercase tracking-widest mb-1">TOTAL DUE</p>
+                            <p className="text-xl font-black text-primary-400">
+                                Rs. {totalDue.toLocaleString()}
+                            </p>
+                        </div>
+                        <div className="border-l border-primary-800/50 pl-10">
+                            <p className="text-primary-300 text-[10px] font-bold uppercase tracking-widest mb-1">TOTAL PROFIT</p>
+                            <p className="text-xl font-black text-primary-400">
+                                Rs. {totalProfit.toLocaleString()}
+                            </p>
+                        </div>
+                        {/* <div className="border-l border-primary-800/50 pl-10">
                             <p className="text-primary-300 text-[10px] font-bold uppercase tracking-widest mb-1">In Quotations</p>
                             <p className="text-xl font-black text-primary-400">
                                 Rs. {totalQuotations.toLocaleString()}
                             </p>
-                        </div>
+                        </div> */}
 
                         {/* Aging Quick Filters */}
                         <div className="flex items-center gap-3 border-l border-primary-800/50 pl-10">

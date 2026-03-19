@@ -14,6 +14,7 @@ import {
 import { useAuth } from "@/src/context/AuthContext";
 import { useBankDetails } from "@/src/context/BankDetailsContext";
 import { allBankDetails } from "@/src/Data/bankDetails";
+import Image from "next/image";
 
 const Navbar = () => {
   const pathname = usePathname();
@@ -37,13 +38,14 @@ const Navbar = () => {
         <div className="flex justify-between h-14">
           <div className="flex items-center gap-6">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-2 group">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white shadow-lg shadow-primary-200 group-hover:scale-105 transition-transform">
+            <Link href="/" className="flex items-center gap-1 group">
+              {/* <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white shadow-lg shadow-primary-200 group-hover:scale-105 transition-transform">
                 <Store size={18} />
-              </div>
-              <span className="text-lg font-black text-gray-900 tracking-tight hidden sm:block uppercase">
-                POS<span className="text-primary font-extrabold pb-0.5">Master</span>
-              </span>
+              </div> */}
+              <img src={"/ApexLogo.png"} width={60} height={60} alt="Apex" />
+              {/* <span className="text-lg font-black text-gray-900 tracking-tight hidden sm:block uppercase">
+                <span className="text-primary font-extrabold pb-0.5">APEX</span>
+              </span> */}
             </Link>
 
             {/* Nav Links */}

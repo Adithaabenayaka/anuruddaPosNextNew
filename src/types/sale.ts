@@ -4,10 +4,11 @@ export interface SaleItem {
     productId: string; // The custom SKU-XXX ID
     productName: string;
     price: number;
-    originalPrice?: number;
+    originalPrice?: number | null;
+    cost: number;
     qty: number;
-    batchId?: string; // Link to specific product batch
-    batchLabel?: string; // Label of the batch at time of sale
+    batchId?: string | null; // Link to specific product batch
+    batchLabel?: string | null; // Label of the batch at time of sale
 }
 
 export interface PaymentTransaction {
@@ -22,7 +23,7 @@ export type SaleStatus = 'completed' | 'pending-payment' | 'quotation';
 
 export interface Sale {
     id?: string;
-    customerId?: string; // Link to registered customer
+    customerId?: string | null; // Link to registered customer
     buyerName: string;
     items: SaleItem[];
     total: number;

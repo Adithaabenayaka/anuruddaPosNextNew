@@ -78,9 +78,9 @@ export default function SalesPage() {
     // Determine the selling price vs original price
     const batchPrice = selectedBatch ? selectedBatch.price : product.price;
     const batchDiscountPrice = selectedBatch ? selectedBatch.discountedPrice : product.discountedPrice;
-
     const itemOriginalPrice = batchPrice;
     const itemPrice = batchDiscountPrice !== undefined && batchDiscountPrice > 0 ? batchDiscountPrice : batchPrice;
+    const itemCost = selectedBatch ? selectedBatch.cost : product.cost;
 
     const itemAvailableQty = selectedBatch ? selectedBatch.availableQty : product.availableQty;
 
@@ -103,14 +103,14 @@ export default function SalesPage() {
           productId: product.productId,
           productName: product.productName,
           price: itemPrice,
-          originalPrice: itemPrice !== itemOriginalPrice ? itemOriginalPrice : undefined,
+          originalPrice: itemPrice !== itemOriginalPrice ? itemOriginalPrice : null,
+          cost: itemCost,
           qty: 1,
-          batchId: activeBatchId,
-          batchLabel: selectedBatch?.label,
+          batchId: activeBatchId || null,
+          batchLabel: selectedBatch?.label || null,
         },
       ];
     });
-    setSearchTerm(""); // Reset search after select
   };
 
   const updateQty = (id: string, delta: number, batchId?: string) => {
@@ -188,7 +188,7 @@ export default function SalesPage() {
       setIsProcessing(true);
       const saleData: CreateSaleInput = {
         buyerName,
-        customerId: selectedCustomerId || undefined,
+        customerId: selectedCustomerId || null,
         items: cart,
         total: cartTotal,
         paidAmount: isQuotation ? 0 : paidAmount,
@@ -398,7 +398,7 @@ export default function SalesPage() {
                           </div>
                         </div>
                         <button
-                          onClick={() => removeFromCart(item.id, item.batchId)}
+                          onClick={() => removeFromCart(item.id, item.batchId ?? undefined)}
                           className="text-gray-300 hover:text-rose-500 transition-colors p-1"
                         >
                           <Trash2 size={14} />
@@ -406,9 +406,9 @@ export default function SalesPage() {
                       </div>
                       <div className="flex justify-between items-center">
                         <div className="flex items-center bg-white rounded-md border border-gray-200 overflow-hidden shadow-sm scale-90 origin-left">
-                          <button onClick={() => updateQty(item.id, -1, item.batchId)} className="p-1 px-2 hover:bg-gray-100 border-r border-gray-100 text-gray-500"><Minus size={12} /></button>
+                          <button onClick={() => updateQty(item.id, -1, item.batchId ?? undefined)} className="p-1 px-2 hover:bg-gray-100 border-r border-gray-100 text-gray-500"><Minus size={12} /></button>
                           <span className="px-2 font-black text-xs min-w-[30px] text-center text-primary-600">{item.qty}</span>
-                          <button onClick={() => updateQty(item.id, 1, item.batchId)} className="p-1 px-2 hover:bg-gray-100 border-l border-gray-100 text-gray-500"><Plus size={12} /></button>
+                          <button onClick={() => updateQty(item.id, 1, item.batchId ?? undefined)} className="p-1 px-2 hover:bg-gray-100 border-l border-gray-100 text-gray-500"><Plus size={12} /></button>
                         </div>
                         <p className="font-black text-gray-900 text-sm">
                           Rs. {(item.price * item.qty).toLocaleString()}

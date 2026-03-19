@@ -110,7 +110,7 @@ const ReceiptPrint = ({ sale }: ReceiptPrintProps) => {
                             {/* MRP */}
                             <div className="text-right">
                                 {item.originalPrice && item.originalPrice > item.price ? (
-                                    <span className="line-through text-gray-400">
+                                    <span className="text-gray-400">
                                         {formatLKR(item.originalPrice)}
                                     </span>
                                 ) : (
