@@ -5,6 +5,7 @@ import { AuthProvider } from "@/src/context/AuthContext";
 import { AppDataProviders } from "@/src/context/AppDataProviders";
 import { ProtectedRoute } from "@/src/components/ProtectedRoute";
 import Navbar from "@/src/components/Navbar";
+import Sidebar from "@/src/components/SideBar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,16 +33,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-gray-50/50`}
       >
         <AuthProvider>
-          <AppDataProviders>
-            <ProtectedRoute>
-              <div className="flex flex-col min-h-screen">
-                <Navbar />
-                <main className="flex-1">
-                  {children}
-                </main>
-              </div>
-            </ProtectedRoute>
-          </AppDataProviders>
+          {children}
         </AuthProvider>
       </body>
     </html>

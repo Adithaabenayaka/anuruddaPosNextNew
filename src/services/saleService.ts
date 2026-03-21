@@ -13,8 +13,8 @@ export const saleService = {
      */
     async processSale(input: CreateSaleInput): Promise<Sale> {
         try {
-            // 1. Validate and Deduct inventory (ONLY if not a quotation)
-            if (input.status !== 'quotation') {
+            // 1. Validate and Deduct inventory (ONLY if not a quotation or draft)
+            if (input.status !== 'quotation' && input.status !== 'draft') {
                 const currentProducts = await productService.getAllProducts();
 
                 for (const item of input.items) {
@@ -104,6 +104,69 @@ export const saleService = {
             console.error('[saleService] processSale failing:', error);
             throw error;
         }
+    },
+
+    /**
+     * Fetch a single sale record by ID
+     */
+    async getSaleById(id: string): Promise<Sale | null> {
+        return firebaseService.getDocument(SALES_COLLECTION, id) as Promise<Sale | null>;
+    },
+
+    /**
+     * Update an existing sale record
+     */
+    async updateSale(id: string, input: Partial<Sale>): Promise<Sale> {
+        // If updating status to something other than draft/quotation, we might need inventory deduction
+        // But for simplicity in this POS, we usually deduct on "process" (conversion from draft to sale)
+        // If we transition from draft -> completed, we should trigger inventory deduction.
+        
+        // Let's handle the transition from draft/quotation to completed/pending-payment
+        if (input.status && (input.status === 'completed' || input.status === 'pending-payment')) {
+            const existingSale = await this.getSaleById(id);
+            if (existingSale && (existingSale.status === 'draft' || existingSale.status === 'quotation')) {
+                // Deduct inventory now using the NEW items (in case they were modified during resume)
+                const itemsToDeduct = input.items || existingSale.items;
+                const currentProducts = await productService.getAllProducts();
+
+                for (const item of itemsToDeduct) {
+                    const targetProduct = currentProducts.find(p => p.id === item.id);
+                    if (!targetProduct) continue;
+                    
+                    let remainingToDeduct = item.qty;
+                    let updatedBatches = [...(targetProduct.batches || [])];
+                    
+                    if (updatedBatches.length > 0) {
+                        for (let i = 0; i < updatedBatches.length; i++) {
+                            const batch = updatedBatches[i];
+                            if (batch.availableQty <= 0) continue;
+                            const deduction = Math.min(batch.availableQty, remainingToDeduct);
+                            updatedBatches[i] = { ...batch, availableQty: batch.availableQty - deduction };
+                            remainingToDeduct -= deduction;
+                            if (remainingToDeduct === 0) break;
+                        }
+                    } else {
+                        targetProduct.availableQty -= remainingToDeduct;
+                    }
+
+                    const totalQty = updatedBatches.length > 0 ? updatedBatches.reduce((sum, b) => sum + b.availableQty, 0) : targetProduct.availableQty;
+                    await productService.updateProduct(item.id, {
+                        availableQty: totalQty,
+                        batches: updatedBatches
+                    });
+                }
+            }
+        }
+
+        const result = await firebaseService.updateDocument(SALES_COLLECTION, id, input);
+        return result as Sale;
+    },
+
+    /**
+     * Delete a sale record
+     */
+    async deleteSale(id: string): Promise<string> {
+        return firebaseService.deleteDocument(SALES_COLLECTION, id);
     },
 
     /**

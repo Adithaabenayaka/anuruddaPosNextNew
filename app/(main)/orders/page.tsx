@@ -28,7 +28,7 @@ const CloseButton = ({ onClick }: { onClick: () => void }) => (
 );
 
 export default function OrdersPage() {
-    const { sales, loading, loadSales, addPayment } = useSales();
+    const { sales, loading, loadSales, addPayment, deleteSale } = useSales();
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState<string>("all");
     const [selectedSale, setSelectedSale] = useState<Sale | null>(null);
@@ -190,6 +190,11 @@ export default function OrdersPage() {
                                 Quotation
                             </span>
                         )}
+                        {sale.status === 'draft' && (
+                            <span className="text-[10px] bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full border border-gray-200 font-bold uppercase tracking-wider">
+                                Draft
+                            </span>
+                        )}
                     </div>
                 </div>
             )
@@ -279,6 +284,7 @@ export default function OrdersPage() {
                                 { label: "All", value: "all" },
                                 { label: "Paid", value: "completed" },
                                 { label: "Unpaid", value: "pending-payment" },
+                                { label: "Draft", value: "draft" },
                                 { label: "Offer", value: "quotation" }
                             ].map((btn) => (
                                 <button
@@ -424,10 +430,52 @@ export default function OrdersPage() {
                                             selectedSale.status === 'pending-payment' ? 'bg-amber-100 text-amber-700 border-amber-200' :
                                                 'bg-primary-100 text-primary-700 border-primary-200'
                                             }`}>
-                                            {selectedSale.status === 'completed' ? 'Paid' : selectedSale.status === 'pending-payment' ? 'Unpaid' : 'Offer'}
+                                            {selectedSale.status === 'completed' ? 'Paid' : selectedSale.status === 'pending-payment' ? 'Unpaid' : selectedSale.status === 'draft' ? 'Draft' : 'Offer'}
                                         </span>
                                     </div>
                                 </section>
+
+                                {selectedSale.status === 'draft' && (
+                                    <section className="bg-amber-50 p-4 rounded-xl border border-amber-100 flex items-center justify-between">
+                                        <div className="flex items-center gap-3 text-amber-800">
+                                            <div className="p-2 bg-white rounded-lg shadow-sm">
+                                                <History size={18} className="text-amber-500" />
+                                            </div>
+                                            <div>
+                                                <p className="text-xs font-bold">Draft Order</p>
+                                                <p className="text-[10px] opacity-75">This order is not yet completed and hasn't affected inventory.</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <Button
+                                                size="sm"
+                                                className="!bg-rose-500 !text-white hover:!bg-rose-600 !rounded-xl !text-[10px] !font-black uppercase tracking-wider"
+                                                onClick={async () => {
+                                                    if (confirm("Are you sure you want to delete this draft?")) {
+                                                        try {
+                                                            await deleteSale(selectedSale.id!);
+                                                            setSelectedSale(null);
+                                                        } catch (error) {
+                                                            alert("Failed to delete draft.");
+                                                        }
+                                                    }
+                                                }}
+                                            >
+                                                Delete
+                                            </Button>
+                                            <Button
+                                                variant="primary"
+                                                size="sm"
+                                                className="!rounded-xl !text-[10px] !font-black uppercase tracking-wider"
+                                                onClick={() => {
+                                                    window.location.href = `/sales?resume=${selectedSale.id}`;
+                                                }}
+                                            >
+                                                Resume Order
+                                            </Button>
+                                        </div>
+                                    </section>
+                                )}
 
                                 {/* Items List */}
                                 <section>

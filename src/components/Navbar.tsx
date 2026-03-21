@@ -33,8 +33,8 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className="sticky top-0 z-40 w-full bg-white border-b border-gray-100 shadow-sm no-print">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav className="sticky w-full bg-white border-b border-gray-100 shadow-sm no-print">
+      <div className="mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-14">
           <div className="flex items-center gap-6">
             {/* Logo */}

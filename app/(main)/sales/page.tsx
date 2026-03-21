@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Search, ShoppingCart, Trash2, User, Plus, Minus, CreditCard, ClipboardList, Wallet, CheckCircle2, FileText, Printer, ArrowRight } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Product } from "@/src/types/product";
 import { Customer } from "@/src/types/customer";
 import { SaleItem, CreateSaleInput, SaleStatus, Sale } from "@/src/types/sale";
@@ -30,8 +30,9 @@ export default function SalesPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [lastProcessedSale, setLastProcessedSale] = useState<Sale | null>(null);
-
-  useEffect(() => { console.log(lastProcessedSale) }, [lastProcessedSale])
+  const searchParams = useSearchParams();
+  const resumedSaleId = searchParams.get("resume");
+  const { getSaleById, updateSale } = useSales();
 
   // Load Data
   const fetchInitialData = useCallback(async () => {
@@ -41,13 +42,29 @@ export default function SalesPage() {
         loadProducts(),
         loadCustomers()
       ]);
+
+      // If resuming a sale, load its details
+      if (resumedSaleId) {
+        const sale = await getSaleById(resumedSaleId);
+        if (sale && sale.status === 'draft') {
+          setBuyerName(sale.buyerName);
+          setCustomerSearch(sale.buyerName);
+          setSelectedCustomerId(sale.customerId || null);
+          setCart(sale.items);
+          setPaidAmount(sale.paidAmount || 0);
+          setIsQuotation(false); // drafts are not quotations by default in this flow
+        } else if (sale) {
+          alert("Only draft orders can be resumed.");
+          router.replace("/sales");
+        }
+      }
     } catch (error) {
       console.error("Error loading sales data:", error);
       alert("Failed to load store data.");
     } finally {
       setIsLoading(false);
     }
-  }, [loadCustomers, loadProducts]);
+  }, [loadCustomers, loadProducts, resumedSaleId, getSaleById, router]);
 
   useEffect(() => {
     fetchInitialData();
@@ -186,7 +203,7 @@ export default function SalesPage() {
 
     try {
       setIsProcessing(true);
-      const saleData: CreateSaleInput = {
+      const saleData: any = {
         buyerName,
         customerId: selectedCustomerId || null,
         items: cart,
@@ -196,7 +213,15 @@ export default function SalesPage() {
         status: derivedStatus,
       };
 
-      const processedSale = await processSale(saleData);
+      let processedSale;
+      if (resumedSaleId) {
+        processedSale = await updateSale(resumedSaleId, saleData);
+        // Clear the resume param from URL
+        router.replace("/sales");
+      } else {
+        processedSale = await processSale(saleData);
+      }
+      
       await refreshProducts();
 
       // Setup Success Modal
@@ -214,6 +239,53 @@ export default function SalesPage() {
     } catch (error: any) {
       console.error("Sale processing failed:", error);
       alert(error.message || "Failed to process sale. Try again.");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleSaveDraft = async () => {
+    if (!buyerName.trim()) {
+      alert("Please enter the buyer's name to save a draft.");
+      return;
+    }
+    if (cart.length === 0) {
+      alert("Cart is empty.");
+      return;
+    }
+
+    try {
+      setIsProcessing(true);
+      const saleData: any = {
+        buyerName,
+        customerId: selectedCustomerId || null,
+        items: cart,
+        total: cartTotal,
+        paidAmount: 0,
+        balanceAmount: cartTotal,
+        status: 'draft',
+      };
+
+      if (resumedSaleId) {
+        await updateSale(resumedSaleId, saleData);
+        router.replace("/sales");
+      } else {
+        await processSale(saleData);
+      }
+      
+      alert("Order saved as draft!");
+      
+      // Cleanup Cart UI
+      setCart([]);
+      setBuyerName("");
+      setSelectedCustomerId(null);
+      setCustomerSearch("");
+      setSearchTerm("");
+      setPaidAmount(0);
+      setIsQuotation(false);
+    } catch (error: any) {
+      console.error("Draft saving failed:", error);
+      alert(error.message || "Failed to save draft. Try again.");
     } finally {
       setIsProcessing(false);
     }
@@ -481,22 +553,36 @@ export default function SalesPage() {
                   )}
                 </div>
 
-                <Button
-                  variant="primary"
-                  className={`!w-full !rounded-xl h-11 !shadow-none !text-xs !font-black uppercase tracking-[0.1em] ${isQuotation ? '!bg-emerald-600 hover:!bg-emerald-700' : derivedStatus === 'pending-payment' ? '!bg-amber-500 hover:!bg-amber-600 border-amber-500' : ''}`}
-                  onClick={handleCheckout}
-                  isLoading={isProcessing}
-                  leftIcon={!isProcessing && (
-                    isQuotation ? <ClipboardList size={14} /> :
-                      derivedStatus === 'pending-payment' ? <Wallet size={14} /> :
-                        <CreditCard size={14} />
+                <div className="flex gap-2 mb-3">
+                  <Button
+                    variant="primary"
+                    className={`flex-1 !rounded-xl h-11 !shadow-none !text-xs !font-black uppercase tracking-[0.1em] ${isQuotation ? '!bg-emerald-600 hover:!bg-emerald-700' : derivedStatus === 'pending-payment' ? '!bg-amber-500 hover:!bg-amber-600 border-amber-500' : ''}`}
+                    onClick={handleCheckout}
+                    isLoading={isProcessing}
+                    leftIcon={!isProcessing && (
+                      isQuotation ? <ClipboardList size={14} /> :
+                        derivedStatus === 'pending-payment' ? <Wallet size={14} /> :
+                          <CreditCard size={14} />
+                    )}
+                  >
+                    {isProcessing ? "Processing..." :
+                      isQuotation ? "Issue Quote" :
+                        derivedStatus === 'pending-payment' ? "Part Payment / Credit" :
+                          "Complete Order"}
+                  </Button>
+                  
+                  {!isQuotation && (
+                    <Button
+                      variant="primary"
+                      className="!bg-gray-100 !text-gray-600 hover:!bg-gray-200 !rounded-xl h-11 !shadow-none !text-[10px] !font-black uppercase tracking-wider px-4"
+                      onClick={handleSaveDraft}
+                      isLoading={isProcessing}
+                      title="Save as Draft"
+                    >
+                      <FileText size={16} />
+                    </Button>
                   )}
-                >
-                  {isProcessing ? "Processing..." :
-                    isQuotation ? "Issue Quote" :
-                      derivedStatus === 'pending-payment' ? "Part Payment / Credit" :
-                        "Complete Order"}
-                </Button>
+                </div>
               </footer>
             </div>
           </div>

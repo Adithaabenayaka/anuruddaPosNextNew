@@ -12,6 +12,9 @@ type SalesContextType = {
   refreshSales: () => Promise<Sale[]>;
   processSale: (input: CreateSaleInput) => Promise<Sale>;
   addPayment: (saleId: string, amount: number) => Promise<Sale>;
+  getSaleById: (id: string) => Promise<Sale | null>;
+  updateSale: (id: string, input: Partial<Sale>) => Promise<Sale>;
+  deleteSale: (id: string) => Promise<void>;
 };
 
 const SalesContext = createContext<SalesContextType | undefined>(undefined);
@@ -52,6 +55,21 @@ export const SalesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return updated;
   }, []);
 
+  const getSaleById = useCallback(async (id: string) => {
+    return saleService.getSaleById(id);
+  }, []);
+
+  const updateSale = useCallback(async (id: string, input: Partial<Sale>) => {
+    const updated = await saleService.updateSale(id, input);
+    setSales((prev) => prev.map((item) => (item.id === id ? updated : item)));
+    return updated;
+  }, []);
+
+  const deleteSale = useCallback(async (id: string) => {
+    await saleService.deleteSale(id);
+    setSales((prev) => prev.filter((item) => item.id !== id));
+  }, []);
+
   const value = useMemo(
     () => ({
       sales,
@@ -61,8 +79,11 @@ export const SalesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       refreshSales,
       processSale,
       addPayment,
+      getSaleById,
+      updateSale,
+      deleteSale,
     }),
-    [sales, loading, hasLoaded, loadSales, refreshSales, processSale, addPayment]
+    [sales, loading, hasLoaded, loadSales, refreshSales, processSale, addPayment, getSaleById, updateSale, deleteSale]
   );
 
   return <SalesContext.Provider value={value}>{children}</SalesContext.Provider>;

@@ -19,7 +19,7 @@ export interface PaymentTransaction {
     balanceAmountAfter?: number;
 }
 
-export type SaleStatus = 'completed' | 'pending-payment' | 'quotation';
+export type SaleStatus = 'completed' | 'pending-payment' | 'quotation' | 'draft';
 
 export interface Sale {
     id?: string;
