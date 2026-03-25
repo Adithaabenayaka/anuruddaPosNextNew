@@ -1,15 +1,8 @@
 "use client";
 
-import React from "react";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  ShoppingCart,
-  CreditCard,
-  Package,
-  Users,
-  LogOut,
-  Store
+  LogOut
 } from "lucide-react";
 import { useAuth } from "@/src/context/AuthContext";
 import { useBankDetails } from "@/src/context/BankDetailsContext";
@@ -24,54 +17,12 @@ const Navbar = () => {
   // Don't show navbar on login page or if not logged in
   if (!user || pathname === "/login") return null;
 
-  const navItems = [
-    { name: "Checkout", href: "/sales", icon: ShoppingCart },
-    { name: "Orders", href: "/orders", icon: CreditCard },
-    { name: "Payments", href: "/payments", icon: CreditCard },
-    { name: "Products", href: "/products", icon: Package },
-    { name: "Customers", href: "/customers", icon: Users },
-  ];
 
   return (
-    <nav className="sticky w-full bg-white border-b border-gray-100 shadow-sm no-print">
+    <nav className=" w-full bg-white no-print ">
       <div className="mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-14">
-          <div className="flex items-center gap-6">
-            {/* Logo */}
-            <Link href="/" className="flex items-center gap-1 group">
-              {/* <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white shadow-lg shadow-primary-200 group-hover:scale-105 transition-transform">
-                <Store size={18} />
-              </div> */}
-              <img src={"/ApexLogo.png"} width={60} height={60} alt="Apex" />
-              {/* <span className="text-lg font-black text-gray-900 tracking-tight hidden sm:block uppercase">
-                <span className="text-primary font-extrabold pb-0.5">APEX</span>
-              </span> */}
-            </Link>
+        <div className="flex justify-end h-14">
 
-            {/* Nav Links */}
-            <div className="hidden md:flex items-center gap-1">
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                const isActive = pathname === item.href;
-
-                return (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className={`
-                      flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all
-                      ${isActive
-                        ? "bg-primary-50 text-primary border border-primary-100/50"
-                        : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"}
-                    `}
-                  >
-                    <Icon size={16} />
-                    {item.name}
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
 
           <div className="flex items-center gap-4">
             {/* Bank Details Switcher */}

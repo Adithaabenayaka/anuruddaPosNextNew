@@ -1,23 +1,26 @@
 "use client";
 
-import React from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import React, { useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import {
-  LayoutDashboard,
-  User,
   ChevronRight,
   ShoppingCart,
   CreditCard,
   Package,
   Users,
-  LogOut,
+  LayoutGrid,
+  X,
+  Menu,
 } from "lucide-react";
 import { useAuth } from "@/src/context/AuthContext";
+import Image from "next/image";
 
 const Sidebar = () => {
+  const router = useRouter();
   const pathname = usePathname();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
+
+  const [isOpen, setIsOpen] = useState(false);
 
   if (!user || pathname === "/login") return null;
 
@@ -29,98 +32,121 @@ const Sidebar = () => {
     { name: "Customers", href: "/customers", icon: Users },
   ];
 
+  const handleNavigation = (href: string) => {
+    router.push(href);
+    setIsOpen(false);
+  };
+
   return (
-    <div className="fixed left-0 top-0 w-72 h-screen bg-gray-100 p-5 flex flex-col justify-between">
+    <>
+      {/* Mobile Toggle Button */}
+      {!isOpen && (
+        <button
+          onClick={() => setIsOpen(true)}
+          className="md:hidden fixed top-4 left-4 z-40 p-2 bg-white rounded-lg shadow-lg border border-gray-100 text-gray-600 hover:text-primary transition-colors"
+        >
+          <Menu size={24} />
+        </button>
+      )}
 
-      {/* TOP */}
-      <div className="flex flex-col gap-6">
+      {/* Backdrop (Mobile only) */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 z-40 md:hidden backdrop-blur-sm transition-opacity duration-300"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
 
-        {/* Main */}
-        <div>
-          <h2 className="text-md font-semibold text-gray-700 mb-4">Main</h2>
+      {/* Sidebar Container */}
+      <aside
+        className={`
+          fixed top-0 left-0 h-full bg-white border-r border-gray-200 z-50
+          transition-all duration-300 ease-in-out
+          w-64 flex flex-col
+          ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
+        `}
+      >
+        {/* Header/Logo */}
+        <div className="h-16 flex items-center justify-between px-6 border-b border-gray-50 bg-white">
+          <div className="flex mt-2 items-center">
+            <Image
+              src="/mainLogo/Logo.png"
+              alt="Logo"
+              width={110}
+              height={90}
+              className="object-contain cursor-pointer"
+              onClick={() => handleNavigation("/")}
+            />
+          </div>
+          <button
+            onClick={() => setIsOpen(false)}
+            className="md:hidden p-2 text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            <X size={20} />
+          </button>
+        </div>
 
-          {/* Dashboard (keep your style) */}
-          <Link href="/">
-            <div
-              className={`flex items-center justify-between px-3 py-2 rounded-xl cursor-pointer
-              ${pathname === "/"
-                  ? "bg-orange-100 text-orange-500"
-                  : "text-gray-700 hover:bg-gray-200"
-                }`}
-            >
-              <div className="flex items-center gap-3">
-                <LayoutDashboard size={20} />
-                <span className="text-sm">Dashboard</span>
-              </div>
-              <div className="bg-orange-200 p-1 rounded-full">
-                <ChevronRight size={16} />
-              </div>
+        {/* Navigation Content */}
+        <div className="flex-1 overflow-y-auto py-6 px-4 space-y-8">
+          {/* Main Section */}
+          <div>
+            <h3 className="px-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">
+              Dashboard
+            </h3>
+            <div className="space-y-1">
+              <button
+                onClick={() => handleNavigation("/")}
+                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 group
+                    ${pathname === "/"
+                    ? "bg-primary-50 text-primary shadow-sm"
+                    : "text-gray-600 hover:bg-gray-50 hover:text-primary"}
+                  `}
+              >
+                <div className="flex items-center gap-3">
+                  <LayoutGrid size={18} className={pathname === "/" ? "text-primary" : "text-gray-400 group-hover:text-primary"} />
+                  <span className="text-sm font-semibold">Home</span>
+                </div>
+                <ChevronRight size={14} className={pathname === "/" ? "text-primary/70" : "text-gray-300 group-hover:text-primary/70"} />
+              </button>
             </div>
-          </Link>
+          </div>
 
-          {/* Super Admin */}
-          <div className="flex items-center justify-between mt-4 px-3 py-2 text-gray-700 hover:bg-gray-200 rounded-xl cursor-pointer">
-            <div className="flex items-center gap-3">
-              <User size={20} />
-              <span className="text-sm">Super Admin</span>
-            </div>
-            <div className="bg-gray-200 p-1 rounded-full">
-              <ChevronRight size={16} />
+          {/* Sales Section */}
+          <div>
+            <h3 className="px-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">
+              Management
+            </h3>
+            <div className="space-y-1">
+              {navItems.map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                  <button
+                    key={item.name}
+                    onClick={() => handleNavigation(item.href)}
+                    className={`w-full flex items-center px-4 py-3 rounded-xl transition-all duration-200 group
+                        ${isActive
+                        ? "bg-primary-50 text-primary shadow-sm"
+                        : "text-gray-600 hover:bg-gray-50 hover:text-primary"}
+                      `}
+                  >
+                    <item.icon size={18} className={`mr-3 ${isActive ? "text-primary" : "text-gray-400 group-hover:text-primary"}`} />
+                    <span className="text-sm font-semibold">{item.name}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
 
-        <hr className="border-gray-300" />
-
-        {/* Navigation (from Navbar) */}
-        <div>
-          <h2 className="text-md font-semibold text-gray-700 mb-4">
-            Navigation
-          </h2>
-
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = pathname === item.href;
-
-            return (
-              <Link key={item.name} href={item.href}>
-                <div
-                  className={`flex items-center gap-3 px-3 py-2 rounded-xl cursor-pointer text-sm
-                  ${isActive
-                      ? "bg-orange-100 text-orange-500"
-                      : "text-gray-700 hover:bg-gray-200"
-                    }`}
-                >
-                  <Icon size={18} />
-                  <span>{item.name}</span>
-                </div>
-              </Link>
-            );
-          })}
+        {/* Footer */}
+        <div className="p-4 border-t border-gray-50 mt-auto">
+          <div className="bg-gray-50 rounded-2xl p-4 flex flex-col items-center">
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Powered by</p>
+            <p className="text-xs font-bold text-primary">Dreams POS</p>
+          </div>
         </div>
-      </div>
-
-      {/* BOTTOM */}
-      <div className="flex flex-col gap-4">
-
-        {/* User Info */}
-        <div className="px-3">
-          <p className="text-sm font-semibold text-gray-900">
-            {user.email?.split("@")[0] || "Admin"}
-          </p>
-          <p className="text-xs text-gray-400 uppercase">Manager</p>
-        </div>
-
-        {/* Logout */}
-        <button
-          onClick={logout}
-          className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm bg-gray-200 text-gray-600 hover:bg-rose-50 hover:text-rose-600 transition"
-        >
-          <LogOut size={18} />
-          Logout
-        </button>
-      </div>
-    </div>
+      </aside>
+    </>
   );
 };
 

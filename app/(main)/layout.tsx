@@ -4,28 +4,31 @@ import Sidebar from "@/src/components/SideBar";
 import { AppDataProviders } from "@/src/context/AppDataProviders";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-    return <>
+  return (
+    <>
+      <AppDataProviders>
+        <ProtectedRoute>
+          <div className="h-screen w-full flex overflow-hidden bg-gray-50 font-sans">
+            {/* Sidebar - Positioned self-containedly */}
+            <Sidebar />
 
-        <AppDataProviders>
-            <ProtectedRoute>
-                <div className="h-screen w-screen overflow-hidden">
-                    {/* Sidebar */}
-                    <div className="fixed left-0 top-0 h-full w-64 bg-gray-700 text-white">
-                        <Sidebar />
-                    </div>
+            {/* Main Content Area */}
+            <div className="flex-1 flex flex-col min-w-0 h-full transition-all duration-300 md:ml-64">
+              {/* Navbar Header */}
+              <header className="h-16 bg-white z-20 flex items-center px-4 border-b border-gray-100 shadow-sm transition-all md:rounded-br-[2.5rem]">
+                <Navbar />
+              </header>
 
-                    {/* Navbar */}
-                    <div className="fixed top-0 left-72 right-0 h-16 bg-white shadow z-10 flex items-center px-4">
-                        <Navbar />
-                    </div>
-
-                    {/* Main Content */}
-                    <div className="ml-64 mt-16 h-[calc(100vh-4rem)] overflow-y-auto bg-gray-100 p-4">
-                        {children}
-                    </div>
+              {/* Page Content */}
+              <main className="flex-1 p-3 md:p-6 lg:p-8 bg-gray-50 overflow-hidden">
+                <div className="h-full bg-white rounded-3xl shadow-sm overflow-y-auto border border-gray-100/50">
+                  {children}
                 </div>
-            </ProtectedRoute>
-        </AppDataProviders>
-
-    </>;
+              </main>
+            </div>
+          </div>
+        </ProtectedRoute>
+      </AppDataProviders>
+    </>
+  );
 }

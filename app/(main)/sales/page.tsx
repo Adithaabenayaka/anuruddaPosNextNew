@@ -12,6 +12,7 @@ import { useSales } from "@/src/context/SalesContext";
 import Button from "@/src/components/Button";
 import ReceiptPrint from "@/src/components/ReceiptPrint";
 import CloseButton from "@/src/components/CloseButton";
+import Dropdown from "@/src/common/Dropdown";
 
 export default function SalesPage() {
   const router = useRouter();
@@ -33,6 +34,8 @@ export default function SalesPage() {
   const searchParams = useSearchParams();
   const resumedSaleId = searchParams.get("resume");
   const { getSaleById, updateSale } = useSales();
+
+  const [data, setData] = useState<string>("");
 
   // Load Data
   const fetchInitialData = useCallback(async () => {
@@ -221,7 +224,7 @@ export default function SalesPage() {
       } else {
         processedSale = await processSale(saleData);
       }
-      
+
       await refreshProducts();
 
       // Setup Success Modal
@@ -272,9 +275,9 @@ export default function SalesPage() {
       } else {
         await processSale(saleData);
       }
-      
+
       alert("Order saved as draft!");
-      
+
       // Cleanup Cart UI
       setCart([]);
       setBuyerName("");
@@ -293,22 +296,16 @@ export default function SalesPage() {
 
   return (
     <div className="relative">
-      <div className="no-print p-6 max-w-7xl mx-auto min-h-[60vh]">
-        <header className="mb-4 flex items-center justify-between">
-          {/* <div>
-            <h1 className="text-xl font-black text-gray-900 tracking-tight">
-              Checkout Terminal
-            </h1>
-            <p className="text-gray-400 text-[10px] mt-0.5">Generate sales and manage receipts</p>
-          </div> */}
+      <div className="no-print p-6 mx-auto min-h-[60vh]">
 
-        </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* Left Side: Search & Selection */}
           <div className="lg:col-span-7 space-y-4">
+            {data}
+            {/* <Dropdown placeholder="hi" value={data} onChange={(val)=>setData(val)}/> */}
             {/* Buyer Info */}
-            <section className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 relative z-30">
+            <section className="bg-white  relative z-30">
               <label className="text-[11px] font-bold text-gray-500 block mb-2 flex items-center justify-between gap-2 uppercase tracking-wider">
                 <div className="flex items-center gap-2">
                   <User size={14} className="text-primary-500" />
@@ -324,7 +321,7 @@ export default function SalesPage() {
                 <input
                   type="text"
                   placeholder="Search customer or enter guest name..."
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-4 focus:ring-primary-50 focus:border-primary-500 outline-none transition-all text-sm font-semibold"
+                  className="w-full px-4 py-3 rounded-md border border-gray-200 focus:ring-4 focus:ring-primary-50 focus:border-primary-500 outline-none transition-all text-sm font-semibold"
                   value={customerSearch}
                   onChange={(e) => {
                     setCustomerSearch(e.target.value);
@@ -570,7 +567,7 @@ export default function SalesPage() {
                         derivedStatus === 'pending-payment' ? "Part Payment / Credit" :
                           "Complete Order"}
                   </Button>
-                  
+
                   {!isQuotation && (
                     <Button
                       variant="primary"
