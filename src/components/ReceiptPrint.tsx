@@ -40,7 +40,7 @@ const ReceiptPrint = ({ sale }: ReceiptPrintProps) => {
         <div className="receipt-print-container bg-white text-black font-sans flex justify-center">
             {/* Paper wrapper */}
             <div
-                className={`bg-white ${isQuotation ? "w-[850px] min-h-[1123px] " : "w-[500px] min-h-[595px]"}`}
+                className={`bg-white ${isQuotation ? "w-[850px] " : "w-[500px]"}`}
             >
 
                 {/* Header */}
@@ -68,7 +68,7 @@ const ReceiptPrint = ({ sale }: ReceiptPrintProps) => {
 
                 {/* Title */}
                 <div className="flex justify-between items-center mt-3 mb-4">
-                    <h1 className="text-base font-semibold">INVOICE</h1>
+                    <h1 className="text-base font-semibold">{isQuotation ? "QUOTATION" : "INVOICE"}</h1>
                     {/* <p className="text-[10px] font-semibold">INVOICE NO: {sale.id}</p> */}
                 </div>
 
