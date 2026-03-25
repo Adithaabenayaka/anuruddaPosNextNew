@@ -38,7 +38,7 @@ const Sidebar = () => {
   };
 
   return (
-    <>
+    <div className="no-print">
       {/* Mobile Toggle Button */}
       {!isOpen && (
         <button
@@ -146,7 +146,7 @@ const Sidebar = () => {
           </div>
         </div>
       </aside>
-    </>
+    </ div>
   );
 };
 

@@ -13,13 +13,14 @@ interface SummaryProps {
     updateQty: (id: string, qty: number, batchId?: string) => void;
     handleCheckout: () => void;
     handleSaveDraft: () => void;
+    handleCleanCart: () => void;
     isProcessing: boolean;
     derivedStatus: SaleStatus;
     balanceAmount: number;
 }
 
 
-const Summary = ({ cart, cartTotal, paidAmount, setPaidAmount, isQuotation, setIsQuotation, removeFromCart, updateQty, handleCheckout, handleSaveDraft, isProcessing, derivedStatus, balanceAmount }: SummaryProps) => {
+const Summary = ({ cart, cartTotal, paidAmount, setPaidAmount, isQuotation, setIsQuotation, removeFromCart, updateQty, handleCheckout, handleSaveDraft, handleCleanCart, isProcessing, derivedStatus, balanceAmount }: SummaryProps) => {
 
 
     return (
@@ -147,7 +148,32 @@ const Summary = ({ cart, cartTotal, paidAmount, setPaidAmount, isQuotation, setI
                         )}
                     </div>
 
-                    <div className="flex gap-2 mb-3">
+                    <div className={`flex grid ${isQuotation ? 'grid-cols-1' : 'grid-cols-2'} gap-2 mb-3`}>
+                        {!isQuotation && (
+                            <Button
+                                variant="primary"
+                                className="!bg-gray-100 text-gray-600 hover:!bg-gray-200 !rounded-xl h-11 !shadow-none !text-[10px] !font-black uppercase tracking-wider px-4"
+                                onClick={handleSaveDraft}
+                                isLoading={isProcessing}
+                                title="Save as Draft"
+                            >
+                                <FileText size={16} color="white" />
+                                Save as Draft
+                            </Button>
+                        )}
+                        <Button
+                            variant="primary"
+                            className="!bg-gray-100 text-gray-600 hover:!bg-gray-200 !rounded-xl h-11 !shadow-none !text-[10px] !font-black uppercase tracking-wider px-4"
+                            onClick={handleCleanCart}
+                            isLoading={isProcessing}
+                            title="Clean Cart"
+                        >
+                            <Trash2 size={16} color="white" />
+                            Clean Cart
+                        </Button>
+                    </div>
+
+                    <div className={`flex gap-2 mb-3`}>
                         <Button
                             variant="primary"
                             className={`flex-1 !rounded-xl h-11 !shadow-none !text-xs !font-black uppercase tracking-[0.1em] ${isQuotation ? '!bg-emerald-600 hover:!bg-emerald-700' : derivedStatus === 'pending-payment' ? '!bg-amber-500 hover:!bg-amber-600 border-amber-500' : ''}`}
@@ -165,17 +191,7 @@ const Summary = ({ cart, cartTotal, paidAmount, setPaidAmount, isQuotation, setI
                                         "Complete Order"}
                         </Button>
 
-                        {!isQuotation && (
-                            <Button
-                                variant="primary"
-                                className="!bg-gray-100 !text-gray-600 hover:!bg-gray-200 !rounded-xl h-11 !shadow-none !text-[10px] !font-black uppercase tracking-wider px-4"
-                                onClick={handleSaveDraft}
-                                isLoading={isProcessing}
-                                title="Save as Draft"
-                            >
-                                <FileText size={16} />
-                            </Button>
-                        )}
+
                     </div>
                 </footer>
             </div>

@@ -294,9 +294,13 @@ export default function SalesPage() {
     }
   };
 
+  const handleCleanCart = () => {
+    setCart([]);
+  }
+
   return (
-    <div className="relative">
-      <div className="no-print p-6 mx-auto min-h-[60vh]">
+    <div className="relative   p-6">
+      <div className="no-print mx-auto min-h-[60vh]">
 
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -436,6 +440,7 @@ export default function SalesPage() {
             updateQty={updateQty}
             handleCheckout={handleCheckout}
             handleSaveDraft={handleSaveDraft}
+            handleCleanCart={handleCleanCart}
             isProcessing={isProcessing}
             derivedStatus={derivedStatus}
             balanceAmount={balanceAmount} />
@@ -459,7 +464,7 @@ export default function SalesPage() {
 
       {/* Success Modal */}
       {showSuccessModal && lastProcessedSale && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 no-print">
+        <div className="no-print fixed inset-0 z-[100] flex items-center justify-center p-4 no-print">
           <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-md transition-opacity" />
 
           <div className="relative bg-white rounded-[32px] shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col transform transition-all animate-in fade-in zoom-in duration-300">
