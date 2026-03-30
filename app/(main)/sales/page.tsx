@@ -14,6 +14,10 @@ import ReceiptPrint from "@/src/components/ReceiptPrint";
 import CloseButton from "@/src/components/CloseButton";
 import Summary from "@/src/components/payments/sales/Summary";
 import SuccessModal from "@/src/components/payments/sales/SuccessModal";
+import Select from "@/src/components/common/Select";
+import SearchSelect from "@/src/components/common/SearchSelect";
+import CustomerSearchSelect from "@/src/components/common/SearchSelect";
+import Input from "@/src/components/common/Input";
 
 
 export default function SalesPage() {
@@ -134,27 +138,15 @@ export default function SalesPage() {
     });
   };
 
-  const updateQty = (id: string, delta: number, batchId?: string) => {
+  const updateQty = (id: string, qty: number, batchId?: string) => {
+    if (qty < 1) return;
+
     setCart((prev) =>
-      prev
-        .map((item) => {
-          if (item.id === id && item.batchId === batchId) {
-            const product = products.find((p) => p.id === id);
-            const maxQty = product?.availableQty || 0;
-
-            const newQty = item.qty + delta;
-
-            // Validation
-            if (newQty < 1) return null; // Signal removal
-            if (newQty > maxQty) {
-              alert(`Only ${maxQty} units available in this selection.`);
-              return item;
-            }
-            return { ...item, qty: newQty };
-          }
-          return item;
-        })
-        .filter(Boolean) as SaleItem[]
+      prev.map((item) =>
+        item.id === id && item.batchId === batchId
+          ? { ...item, qty }
+          : item
+      )
     );
   };
 
@@ -300,32 +292,37 @@ export default function SalesPage() {
   }
 
   return (
-    <div className="relative   p-6">
+    <div className="relative overflow-y-auto  rounded-lg p-6">
       <div className="no-print mx-auto min-h-[60vh]">
 
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* Left Side: Search & Selection */}
-          <div className="lg:col-span-7 space-y-4">
-            {/* <Dropdown placeholder="hi" value={data} onChange={(val)=>setData(val)}/> */}
+          <div className="lg:col-span-6 space-y-4">
+
             {/* Buyer Info */}
             <section className="bg-white  relative z-30">
-              <label className="text-[11px] font-bold text-gray-500 block mb-2 flex items-center justify-between gap-2 uppercase tracking-wider">
+              <label className="text-[13px] font-bold text-gray-500 block mb-2 flex items-center justify-between gap-2 tracking-wider">
                 <div className="flex items-center gap-2">
-                  <User size={14} className="text-primary-500" />
+                  <User size={14} className="text-primary-500 " />
                   Buyer / Customer Details
                 </div>
-                {selectedCustomerId && (
+
+                {selectedCustomerId ? (
                   <span className="text-[9px] bg-emerald-50 text-emerald-600 px-1.5 py-0.5 rounded-md border border-emerald-100 font-black uppercase tracking-wider">
                     Synced
+                  </span>
+                ) : (
+                  <span className="text-[9px] bg-red-50 text-red-600 px-1.5 py-0.5 rounded-md border border-red-100 font-black uppercase tracking-wider">
+                    Not Synced
                   </span>
                 )}
               </label>
               <div className="relative">
-                <input
+
+                <Input
                   type="text"
                   placeholder="Search customer or enter guest name..."
-                  className="w-full px-4 py-3 rounded-md border border-gray-200 focus:ring-4 focus:ring-primary-50 focus:border-primary-500 outline-none transition-all text-sm font-semibold"
                   value={customerSearch}
                   onChange={(e) => {
                     setCustomerSearch(e.target.value);
@@ -333,8 +330,8 @@ export default function SalesPage() {
                     setSelectedCustomerId(null);
                     setShowCustomerResults(true);
                   }}
-                  onFocus={() => setShowCustomerResults(true)}
-                />
+                  onFocus={() => setShowCustomerResults(true)}></Input>
+
                 {showCustomerResults && filteredCustomers.length > 0 && (
                   <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-100 rounded-xl shadow-xl z-50 max-h-60 overflow-y-auto overflow-x-hidden p-1">
                     {filteredCustomers.map(customer => (
@@ -360,61 +357,90 @@ export default function SalesPage() {
             </section>
 
             {/* Product Search */}
-            <section className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex-1 min-h-[300px]">
-              <label className="text-[11px] font-bold text-gray-500 block mb-2 flex items-center gap-2 uppercase tracking-wider">
-                <Search size={14} className="text-primary-500" />
-                Catalogue Search
-              </label>
-              <div className="relative mb-4">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
-                <input
-                  type="text"
-                  placeholder="Search catalog..."
-                  className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 focus:ring-4 focus:ring-primary-50 focus:border-primary-500 outline-none transition-all text-xs font-semibold text-gray-900"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
+            <section className="bg-white p-4 rounded-lg space-y-4 h-full shadow-sm border border-gray-200 flex-1 min-h-[300px]">
+              <Input
+                type="text"
+                placeholder="Search catalog..."
+                value={searchTerm}
+                leftIcon={<Search size={16} className="text-gray-400" />}
+                onChange={(e) => setSearchTerm(e.target.value)} />
+
 
               {/* Search Results */}
               <div className="space-y-2">
                 {searchTerm && filteredProducts.length > 0 ? (
-                  filteredProducts.map((p) => (
-                    <div
-                      key={p.id}
-                      className="flex items-center justify-between p-3 rounded-xl border border-gray-100 hover:border-primary-200 hover:bg-primary-50/40 transition-all cursor-pointer group"
-                      onClick={() => addToCart(p)}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gray-50 rounded-lg overflow-hidden flex-shrink-0 border border-gray-100">
-                          {p.imageUrl ? (
-                            <img src={p.imageUrl} alt="" className="w-full h-full object-cover" />
+                  filteredProducts.map((p) => {
+                    const isOutOfStock = p.availableQty === 0;
+
+                    return (
+                      <div
+                        key={p.id}
+                        onClick={() => {
+                          if (!isOutOfStock) addToCart(p);
+                        }}
+                        className={`flex items-center justify-between p-3 rounded-xl border transition-all group
+        ${isOutOfStock
+                            ? "border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed"
+                            : "border-gray-200 hover:border-primary-200 hover:bg-primary-50/40 cursor-pointer"
+                          }
+      `}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-gray-50 rounded-lg overflow-hidden flex-shrink-0 border border-gray-100">
+                            {p.imageUrl ? (
+                              <img src={p.imageUrl} alt="" className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-gray-300 text-[10px]">
+                                ?
+                              </div>
+                            )}
+                          </div>
+
+                          <div>
+                            <h3
+                              className={`font-bold text-sm transition-colors ${isOutOfStock
+                                ? "text-gray-400"
+                                : "text-gray-900 group-hover:text-primary-600"
+                                }`}
+                            >
+                              {p.productName}
+                            </h3>
+                            <p className="text-[10px] text-gray-400 font-mono italic">
+                              {p.productId}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="text-right">
+                          {p.discountedPrice && p.discountedPrice !== p.price ? (
+                            <>
+                              <p className="text-[10px] text-gray-400 line-through">
+                                Rs. {p.price.toLocaleString()}
+                              </p>
+                              <p className="font-bold text-sm text-primary-600">
+                                Rs. {p.discountedPrice.toLocaleString()}
+                              </p>
+                            </>
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center text-gray-300 text-[10px]">?</div>
+                            <p className="font-bold text-sm text-gray-900">
+                              Rs. {p.price.toLocaleString()}
+                            </p>
                           )}
-                        </div>
-                        <div>
-                          <h3 className="font-bold text-sm text-gray-900 group-hover:text-primary-600 transition-colors">
-                            {p.productName}
-                          </h3>
-                          <p className="text-[10px] text-gray-400 font-mono italic">{p.productId}</p>
+
+                          <p
+                            className={`text-[9px] font-black uppercase tracking-wider ${p.availableQty > 5
+                              ? "text-emerald-500"
+                              : p.availableQty === 0
+                                ? "text-gray-400"
+                                : "text-rose-500"
+                              }`}
+                          >
+                            {p.availableQty === 0 ? "Out of Stock" : `${p.availableQty} Unit(s)`}
+                          </p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        {p.discountedPrice && p.discountedPrice !== p.price ? (
-                          <>
-                            <p className="text-[10px] text-gray-400 line-through">Rs. {p.price.toLocaleString()}</p>
-                            <p className="font-bold text-sm text-primary-600">Rs. {p.discountedPrice.toLocaleString()}</p>
-                          </>
-                        ) : (
-                          <p className="font-bold text-sm text-gray-900">Rs. {p.price.toLocaleString()}</p>
-                        )}
-                        <p className={`text-[9px] font-black uppercase tracking-wider ${p.availableQty > 5 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                          {p.availableQty} Unit(s)
-                        </p>
-                      </div>
-                    </div>
-                  ))
+                    );
+                  })
                 ) : searchTerm ? (
                   <div className="py-8 text-center text-gray-400">
                     <p className="text-sm italic">Nothing found for &quot;{searchTerm}&quot;</p>

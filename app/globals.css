@@ -1,17 +1,26 @@
+/* ✅ 1. IMPORTS (must be first) */
+
+
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Diplomata&family=Onest:wght@100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Questrial&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Play:wght@400;700&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900&display=swap");
+
+
 @import "tailwindcss";
 
+/* ✅ 2. THEME */
 @theme {
   --color-primary: #FF9025;
---color-primary-50:  #fff4e8;
---color-primary-100: #ffe4c2;
---color-primary-200: #ffd19a;
---color-primary-300: #ffbd70;
---color-primary-400: #ffa94a;
---color-primary-500: #ff9025; /* base */
---color-primary-600: #e67f1f;
---color-primary-700: #cc6e19;
---color-primary-800: #b35e14;
---color-primary-900: #8c460e;
+  --color-primary-50: #fff4e8;
+  --color-primary-100: #ffe4c2;
+  --color-primary-200: #ffd19a;
+  --color-primary-300: #ffbd70;
+  --color-primary-400: #ffa94a;
+  --color-primary-500: #ff9025;
+  --color-primary-600: #e67f1f;
+  --color-primary-700: #cc6e19;
+  --color-primary-800: #b35e14;
+  --color-primary-900: #8c460e;
 
   --color-indigo-50: var(--color-primary-50);
   --color-indigo-100: var(--color-primary-100);
@@ -25,6 +34,33 @@
   --color-indigo-900: var(--color-primary-900);
 }
 
+
+/* ✅ 3. BASE LAYER */
+@layer base {
+  :root {
+    --font-plus-sans: "Plus Jakarta Sans", sans-serif;
+
+    --font-size-display1: 48px;
+    --font-size-h1: 32px;
+    --font-size-h2: 28px;
+    --font-size-body1: 16px;
+
+    --font-weight-bold: 700;
+    --font-weight-normal: 400;
+
+    --line-height-display1: 56px;
+    --line-height-h1: 40px;
+
+    --letter-spacing-default: 0px;
+  }
+
+  body {
+    font-family: var(--font-plus-sans);
+  }
+}
+
+
+/* ✅ 4. UTILITIES */
 @layer utilities {
   @media print {
     .no-print {
@@ -39,8 +75,46 @@
       background-color: white !important;
     }
   }
+
+  .font-plus-sans {
+    font-family: var(--font-plus-sans);
+  }
+
+  .display-1-bold {
+    font-family: var(--font-plus-sans);
+    font-size: var(--font-size-display1);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-display1);
+    letter-spacing: var(--letter-spacing-default);
+  }
+
+  .display-1-regular {
+    font-family: var(--font-plus-sans);
+    font-size: var(--font-size-display1);
+    font-weight: var(--font-weight-normal);
+    line-height: var(--line-height-display1);
+    letter-spacing: var(--letter-spacing-default);
+  }
+
+  .heading-1-bold {
+    font-family: var(--font-plus-sans);
+    font-size: var(--font-size-h1);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-h1);
+    letter-spacing: var(--letter-spacing-default);
+  }
+
+  .heading-1-regular {
+    font-family: var(--font-plus-sans);
+    font-size: var(--font-size-h1);
+    font-weight: var(--font-weight-normal);
+    line-height: var(--line-height-h1);
+    letter-spacing: var(--letter-spacing-default);
+  }
 }
 
+
+/* ✅ 5. GLOBAL FALLBACK */
 .print-only {
   display: none;
 }

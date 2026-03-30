@@ -24,8 +24,8 @@ const Summary = ({ cart, cartTotal, paidAmount, setPaidAmount, isQuotation, setI
 
 
     return (
-        <div className="lg:col-span-5 sticky top-20">
-            <div className="bg-white rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden flex flex-col">
+        <div className="lg:col-span-6 sticky top-20">
+            <div className="bg-white rounded-lg shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden flex flex-col">
                 <header className="bg-gray-900 px-5 py-4 text-white">
                     <div className="flex justify-between items-center">
                         <div>
@@ -49,43 +49,70 @@ const Summary = ({ cart, cartTotal, paidAmount, setPaidAmount, isQuotation, setI
                 </header>
 
                 {/* Cart Items List */}
-                <div className="p-4 flex-1 max-h-[350px] overflow-y-auto space-y-3">
+                <div className="p-3 flex-1 max-h-[350px] overflow-y-auto">
                     {cart.length > 0 ? (
-                        cart.map((item) => (
-                            <div key={item.id + (item.batchId || '')} className="flex flex-col gap-1.5 p-2.5 bg-gray-50 rounded-xl border border-gray-100">
-                                <div className="flex justify-between items-start">
-                                    <div>
-                                        <p className="font-bold text-xs text-gray-900">{item.productName}</p>
-                                        {item.batchLabel && <p className="text-[9px] text-primary-500 font-bold uppercase tracking-tighter">{item.batchLabel}</p>}
-                                        <div className="flex items-center gap-1.5">
-                                            {item.originalPrice && item.originalPrice !== item.price && (
-                                                <p className="text-[9px] text-gray-400 line-through">Rs. {item.originalPrice.toLocaleString()}</p>
-                                            )}
-                                            <p className="text-[10px] font-semibold text-gray-600">@ Rs. {item.price.toLocaleString()}</p>
-                                        </div>
+                        <div className="space-y-2">
+                            {cart.map((item) => (
+                                <div
+                                    key={item.id + (item.batchId || "")}
+                                    className="grid grid-cols-12 items-center gap-2 bg-white border border-gray-100 rounded-lg px-2 py-2 text-xs"
+                                >
+                                    {/* Product */}
+                                    <div className="col-span-5 flex flex-col">
+                                        <span className="font-bold text-gray-800 truncate">
+                                            {item.productName}
+                                        </span>
+                                        {item.batchLabel && (
+                                            <span className="text-[9px] text-primary-500 font-bold uppercase">
+                                                {item.batchLabel}
+                                            </span>
+                                        )}
                                     </div>
-                                    <button
-                                        onClick={() => removeFromCart(item.id, item.batchId ?? undefined)}
-                                        className="text-gray-300 hover:text-rose-500 transition-colors p-1"
-                                    >
-                                        <Trash2 size={14} />
-                                    </button>
-                                </div>
-                                <div className="flex justify-between items-center">
-                                    <div className="flex items-center bg-white rounded-md border border-gray-200 overflow-hidden shadow-sm scale-90 origin-left">
-                                        <button onClick={() => updateQty(item.id, -1, item.batchId ?? undefined)} className="p-1 px-2 hover:bg-gray-100 border-r border-gray-100 text-gray-500"><Minus size={12} /></button>
-                                        <span className="px-2 font-black text-xs min-w-[30px] text-center text-primary-600">{item.qty}</span>
-                                        <button onClick={() => updateQty(item.id, 1, item.batchId ?? undefined)} className="p-1 px-2 hover:bg-gray-100 border-l border-gray-100 text-gray-500"><Plus size={12} /></button>
+
+                                    {/* Price */}
+                                    <div className="col-span-2 text-gray-500 font-semibold text-right">
+                                        Rs. {item.price.toLocaleString()}
                                     </div>
-                                    <p className="font-black text-gray-900 text-sm">
+
+                                    {/* Qty Input */}
+                                    <div className="col-span-2 flex justify-center">
+                                        <input
+                                            type="number"
+                                            min={1}
+                                            value={item.qty}
+                                            onChange={(e) =>
+                                                updateQty(
+                                                    item.id,
+                                                    Number(e.target.value),
+                                                    item.batchId ?? undefined
+                                                )
+                                            }
+                                            className="w-14 text-center border border-gray-200 rounded-md px-1 py-1 font-bold text-primary-600 focus:ring-2 focus:ring-primary-100 outline-none"
+                                        />
+                                    </div>
+
+                                    {/* Total */}
+                                    <div className="col-span-2 text-right font-black text-gray-900">
                                         Rs. {(item.price * item.qty).toLocaleString()}
-                                    </p>
+                                    </div>
+
+                                    {/* Remove */}
+                                    <div className="col-span-1 flex justify-end">
+                                        <button
+                                            onClick={() =>
+                                                removeFromCart(item.id, item.batchId ?? undefined)
+                                            }
+                                            className="text-gray-300 hover:text-rose-500 transition"
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
-                        ))
+                            ))}
+                        </div>
                     ) : (
-                        <div className="py-10 text-center text-gray-300">
-                            <p className="text-[10px] font-medium tracking-tight">Cart is empty</p>
+                        <div className="py-10 text-center text-gray-300 text-xs">
+                            Cart is empty
                         </div>
                     )}
                 </div>
