@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { Search, ShoppingCart, User, Plus, CheckCircle2, Printer, ArrowRight } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Product } from "@/src/types/product";
@@ -40,6 +40,24 @@ export default function SalesPage() {
   const searchParams = useSearchParams();
   const resumedSaleId = searchParams.get("resume");
   const { getSaleById, updateSale } = useSales();
+  const [showProductResults, setShowProductResults] = useState(false);
+  const productRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        productRef.current &&
+        !productRef.current.contains(event.target as Node)
+      ) {
+        setShowProductResults(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
 
   // Load Data
@@ -150,6 +168,17 @@ export default function SalesPage() {
     );
   };
 
+  const updatePrice = (id: string, price: number, batchId?: string) => {
+    setCart((prev) =>
+      prev.map((item) => {
+        if (item.id === id && item.batchId === (batchId || null)) {
+          return { ...item, price };
+        }
+        return item;
+      })
+    );
+  };
+
   const removeFromCart = (id: string, batchId?: string) => {
     setCart((prev) => prev.filter((item) => !(item.id === id && item.batchId === batchId)));
   };
@@ -194,6 +223,12 @@ export default function SalesPage() {
     }
     if (cart.length === 0) {
       alert("Cart is empty.");
+      return;
+    }
+
+    const invalidItems = cart.filter(item => item.price <= item.cost);
+    if (invalidItems.length > 0) {
+      alert(`Some items have selling prices below or equal to their cost. Please adjust them before completing the order.`);
       return;
     }
 
@@ -250,6 +285,12 @@ export default function SalesPage() {
       return;
     }
 
+    const invalidItems = cart.filter(item => item.price <= item.cost);
+    if (invalidItems.length > 0) {
+      alert(`Some items have selling prices below or equal to their cost. Please adjust them before saving the draft.`);
+      return;
+    }
+
     try {
       setIsProcessing(true);
       const saleData: any = {
@@ -292,16 +333,16 @@ export default function SalesPage() {
   }
 
   return (
-    <div className="relative overflow-y-auto  rounded-lg p-6">
+    <div className="relative overflow-y-auto  rounded-lg p-2 md:p-6">
       <div className="no-print mx-auto min-h-[60vh]">
 
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <div className="flex flex-col gap-6">
           {/* Left Side: Search & Selection */}
-          <div className="lg:col-span-6 space-y-4">
+          <div className="w-full flex flex-col md:flex-row gap-6">
 
             {/* Buyer Info */}
-            <section className="bg-white  relative z-30">
+            <section className="bg-white w-full md:w-[40%] relative z-30">
               <label className="text-[13px] font-bold text-gray-500 block mb-2 flex items-center justify-between gap-2 tracking-wider">
                 <div className="flex items-center gap-2">
                   <User size={14} className="text-primary-500 " />
@@ -357,102 +398,112 @@ export default function SalesPage() {
             </section>
 
             {/* Product Search */}
-            <section className="bg-white p-4 rounded-lg space-y-4 h-full shadow-sm border border-gray-200 flex-1 min-h-[300px]">
-              <Input
-                type="text"
-                placeholder="Search catalog..."
-                value={searchTerm}
-                leftIcon={<Search size={16} className="text-gray-400" />}
-                onChange={(e) => setSearchTerm(e.target.value)} />
+            <section className="bg-white w-full md:w-[60%] flex-1 gap-6 relative z-30">
+              <label className="text-[13px] font-bold text-gray-500 block mb-2 flex items-center justify-between gap-2 tracking-wider">
+                <div className="flex items-center gap-2">
+                  <User size={14} className="text-primary-500 " />
+                  Product Search
+                </div>
+              </label>
+              <div className="relative" ref={productRef}>
+
+                <Input
+                  type="text"
+                  placeholder="Search catalog..."
+                  value={searchTerm}
+                  leftIcon={<Search size={16} className="text-gray-400" />}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setShowProductResults(true);
+                  }}
+                  onFocus={() => setShowProductResults(true)}
+                />
 
 
-              {/* Search Results */}
-              <div className="space-y-2">
-                {searchTerm && filteredProducts.length > 0 ? (
-                  filteredProducts.map((p) => {
-                    const isOutOfStock = p.availableQty === 0;
+                <div className="space-y-2">
+                  {showProductResults && filteredProducts.length > 0 && (
+                    <div className="absolute top-full left-0 right-0 mt-1 z-50 
+                    bg-white border border-gray-200 rounded-xl shadow-xl 
+                    max-h-80 overflow-y-auto p-2">
+                      {filteredProducts.map((p) => {
+                        const isOutOfStock = p.availableQty === 0;
 
-                    return (
-                      <div
-                        key={p.id}
-                        onClick={() => {
-                          if (!isOutOfStock) addToCart(p);
-                        }}
-                        className={`flex items-center justify-between p-3 rounded-xl border transition-all group
-        ${isOutOfStock
-                            ? "border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed"
-                            : "border-gray-200 hover:border-primary-200 hover:bg-primary-50/40 cursor-pointer"
-                          }
-      `}
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-gray-50 rounded-lg overflow-hidden flex-shrink-0 border border-gray-100">
-                            {p.imageUrl ? (
-                              <img src={p.imageUrl} alt="" className="w-full h-full object-cover" />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center text-gray-300 text-[10px]">
-                                ?
-                              </div>
-                            )}
-                          </div>
-
-                          <div>
-                            <h3
-                              className={`font-bold text-sm transition-colors ${isOutOfStock
-                                ? "text-gray-400"
-                                : "text-gray-900 group-hover:text-primary-600"
-                                }`}
-                            >
-                              {p.productName}
-                            </h3>
-                            <p className="text-[10px] text-gray-400 font-mono italic">
-                              {p.productId}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="text-right">
-                          {p.discountedPrice && p.discountedPrice !== p.price ? (
-                            <>
-                              <p className="text-[10px] text-gray-400 line-through">
-                                Rs. {p.price.toLocaleString()}
-                              </p>
-                              <p className="font-bold text-sm text-primary-600">
-                                Rs. {p.discountedPrice.toLocaleString()}
-                              </p>
-                            </>
-                          ) : (
-                            <p className="font-bold text-sm text-gray-900">
-                              Rs. {p.price.toLocaleString()}
-                            </p>
-                          )}
-
-                          <p
-                            className={`text-[9px] font-black uppercase tracking-wider ${p.availableQty > 5
-                              ? "text-emerald-500"
-                              : p.availableQty === 0
-                                ? "text-gray-400"
-                                : "text-rose-500"
-                              }`}
+                        return (
+                          <div
+                            key={p.id}
+                            onClick={() => {
+                              if (!isOutOfStock) addToCart(p);
+                            }}
+                            className={`flex items-center justify-between p-3 rounded-xl border transition-all group
+                          ${isOutOfStock
+                                ? "border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed"
+                                : "border-gray-200 hover:border-primary-200 hover:bg-primary-50/40 cursor-pointer"
+                              }
+                        `}
                           >
-                            {p.availableQty === 0 ? "Out of Stock" : `${p.availableQty} Unit(s)`}
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  })
-                ) : searchTerm ? (
-                  <div className="py-8 text-center text-gray-400">
-                    <p className="text-sm italic">Nothing found for &quot;{searchTerm}&quot;</p>
-                  </div>
-                ) : (
-                  <div className="py-12 text-center text-gray-400 border-2 border-dashed border-gray-100 rounded-xl">
-                    <Search className="mx-auto mb-2 opacity-15" size={32} />
-                    <p className="text-xs font-medium">Type to lookup items...</p>
-                  </div>
-                )}
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 bg-gray-50 rounded-lg overflow-hidden flex-shrink-0 border border-gray-100">
+                                {p.imageUrl ? (
+                                  <img src={p.imageUrl} alt="" className="w-full h-full object-cover" />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center text-gray-300 text-[10px]">
+                                    ?
+                                  </div>
+                                )}
+                              </div>
+
+                              <div>
+                                <h3
+                                  className={`font-bold text-sm transition-colors ${isOutOfStock
+                                    ? "text-gray-400"
+                                    : "text-gray-900 group-hover:text-primary-600"
+                                    }`}
+                                >
+                                  {p.productName}
+                                </h3>
+                                <p className="text-[10px] text-gray-400 font-mono italic">
+                                  {p.productId}
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="text-right">
+                              {p.discountedPrice && p.discountedPrice !== p.price ? (
+                                <>
+                                  <p className="text-[10px] text-gray-400 line-through">
+                                    Rs. {p.price.toLocaleString()}
+                                  </p>
+                                  <p className="font-bold text-sm text-primary-600">
+                                    Rs. {p.discountedPrice.toLocaleString()}
+                                  </p>
+                                </>
+                              ) : (
+                                <p className="font-bold text-sm text-gray-900">
+                                  Rs. {p.price.toLocaleString()}
+                                </p>
+                              )}
+
+                              <p
+                                className={`text-[9px] font-black uppercase tracking-wider ${p.availableQty > 5
+                                  ? "text-emerald-500"
+                                  : p.availableQty === 0
+                                    ? "text-gray-400"
+                                    : "text-rose-500"
+                                  }`}
+                              >
+                                {p.availableQty === 0 ? "Out of Stock" : `${p.availableQty} Unit(s)`}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                  )}
+                </div>
               </div>
             </section>
+
           </div>
 
           {/* Right Side: Order Summary */}
@@ -465,6 +516,7 @@ export default function SalesPage() {
             setIsQuotation={setIsQuotation}
             removeFromCart={removeFromCart}
             updateQty={updateQty}
+            updatePrice={updatePrice}
             handleCheckout={handleCheckout}
             handleSaveDraft={handleSaveDraft}
             handleCleanCart={handleCleanCart}

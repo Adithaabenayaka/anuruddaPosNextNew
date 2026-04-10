@@ -163,10 +163,63 @@ export const saleService = {
     },
 
     /**
-     * Delete a sale record
+     * Delete a sale record and restore inventory if needed.
      */
     async deleteSale(id: string): Promise<string> {
-        return firebaseService.deleteDocument(SALES_COLLECTION, id);
+        try {
+            const sale = await this.getSaleById(id);
+            if (!sale) {
+                throw new Error("Sale not found.");
+            }
+
+            // Restore inventory ONLY if it was deducted (not for quotations or drafts)
+            if (sale.status === 'completed' || sale.status === 'pending-payment') {
+                const currentProducts = await productService.getAllProducts();
+
+                for (const item of sale.items) {
+                    const targetProduct = currentProducts.find(p => p.id === item.id);
+                    if (!targetProduct) {
+                        console.warn(`[saleService] Product ${item.productName} (${item.id}) not found during inventory restoration.`);
+                        continue;
+                    }
+
+                    let updatedBatches = [...(targetProduct.batches || [])];
+                    const qtyToRestore = item.qty;
+
+                    if (updatedBatches.length > 0) {
+                        // Try to find the batch by label to be more accurate
+                        let batchIndex = updatedBatches.findIndex(b => b.label === item.batchLabel);
+                        
+                        // If not found by label, fall back to the first batch
+                        if (batchIndex === -1) {
+                            batchIndex = 0;
+                        }
+
+                        updatedBatches[batchIndex] = {
+                            ...updatedBatches[batchIndex],
+                            availableQty: updatedBatches[batchIndex].availableQty + qtyToRestore
+                        };
+                    } else {
+                        // Legacy support for products without batches
+                        targetProduct.availableQty += qtyToRestore;
+                    }
+
+                    const totalQty = updatedBatches.length > 0 
+                        ? updatedBatches.reduce((sum, b) => sum + b.availableQty, 0) 
+                        : targetProduct.availableQty;
+
+                    await productService.updateProduct(item.id, {
+                        availableQty: totalQty,
+                        batches: updatedBatches
+                    });
+                }
+            }
+
+            return await firebaseService.deleteDocument(SALES_COLLECTION, id);
+        } catch (error) {
+            console.error('[saleService] deleteSale error:', error);
+            throw error;
+        }
     },
 
     /**

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { CreditCard, Search, Calendar, ChevronRight, X, Package, User, History, CheckCircle2 } from "lucide-react";
+import { CreditCard, Search, Calendar, ChevronRight, X, Package, User, History, CheckCircle2, Trash2 } from "lucide-react";
 import ReceiptPrint from "@/src/components/ReceiptPrint";
 import { Sale } from "@/src/types/sale";
 import { useSales } from "@/src/context/SalesContext";
@@ -88,6 +88,24 @@ export default function OrdersPage() {
             alert(error.message || "Failed to add payment.");
         } finally {
             setIsProcessingPayment(false);
+        }
+    };
+
+    const handleDeleteSale = async () => {
+        if (!selectedSale || !selectedSale.id) return;
+
+        const confirmMessage = selectedSale.status === 'draft' || selectedSale.status === 'quotation'
+            ? "Are you sure you want to delete this record?"
+            : "Are you sure you want to delete this order? This will restore the items back to inventory.";
+
+        if (!confirm(confirmMessage)) return;
+
+        try {
+            await deleteSale(selectedSale.id);
+            setSelectedSale(null);
+        } catch (error: any) {
+            console.error("Error deleting sale:", error);
+            alert(error.message || "Failed to delete order.");
         }
     };
 
@@ -450,16 +468,7 @@ export default function OrdersPage() {
                                             <Button
                                                 size="sm"
                                                 className="!bg-rose-500 !text-white hover:!bg-rose-600 !rounded-xl !text-[10px] !font-black uppercase tracking-wider"
-                                                onClick={async () => {
-                                                    if (confirm("Are you sure you want to delete this draft?")) {
-                                                        try {
-                                                            await deleteSale(selectedSale.id!);
-                                                            setSelectedSale(null);
-                                                        } catch (error) {
-                                                            alert("Failed to delete draft.");
-                                                        }
-                                                    }
-                                                }}
+                                                onClick={handleDeleteSale}
                                             >
                                                 Delete
                                             </Button>
@@ -595,13 +604,24 @@ export default function OrdersPage() {
                                 </div>
                             </div>
 
-                            <footer className="p-5 bg-gray-50 border-t border-gray-100 flex justify-end gap-3 no-print">
-                                <Button size="sm" onClick={() => window.print()}>
-                                    Print Receipt
+                            <footer className="p-5 bg-gray-50 border-t border-gray-100 flex flex-col sm:flex-row justify-between gap-4 no-print">
+                                <Button
+                                    variant="danger"
+                                    size="sm"
+                                    className="!bg-none !bg-transparent !text-rose-600 !border !border-rose-100 hover:!bg-rose-50 !rounded-xl !text-[10px] !font-black uppercase tracking-wider !shadow-none"
+                                    onClick={handleDeleteSale}
+                                >
+                                    <Trash2 size={14} className="mr-2" />
+                                    Delete Record
                                 </Button>
-                                <Button variant="primary" size="sm" onClick={() => setSelectedSale(null)}>
-                                    Close
-                                </Button>
+                                <div className="flex gap-3 justify-end">
+                                    <Button size="sm" onClick={() => window.print()} className="!rounded-xl !text-[10px] !font-black uppercase tracking-wider">
+                                        Print Receipt
+                                    </Button>
+                                    <Button variant="primary" size="sm" onClick={() => setSelectedSale(null)} className="!rounded-xl !text-[10px] !font-black uppercase tracking-wider">
+                                        Close
+                                    </Button>
+                                </div>
                             </footer>
                         </div>
                     </div>
