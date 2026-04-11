@@ -5,13 +5,13 @@ import Button from "@/src/components/Button";
 interface SummaryProps {
     cart: SaleItem[];
     cartTotal: number;
-    paidAmount: number;
-    setPaidAmount: (amount: number) => void;
+    paidAmount: string;
+    setPaidAmount: (amount: string) => void;
     isQuotation: boolean;
     setIsQuotation: (isQuotation: boolean) => void;
     removeFromCart: (id: string, batchId?: string) => void;
     updateQty: (id: string, qty: number, batchId?: string) => void;
-    updatePrice: (id: string, price: number, batchId?: string) => void;
+    updatePrice: (id: string, price: string, batchId?: string) => void;
     handleCheckout: () => void;
     handleSaveDraft: () => void;
     handleCleanCart: () => void;
@@ -88,15 +88,16 @@ const Summary = ({ cart, cartTotal, paidAmount, setPaidAmount, isQuotation, setI
                                                 <span className="absolute left-1.5 top-1/2 -translate-y-1/2 text-[10px] md:text-[8px] text-gray-400 font-bold">Rs.</span>
                                                 <input
                                                     type="number"
-                                                    value={item.price}
+                                                    value={item.price || ''}
                                                     onChange={(e) =>
                                                         updatePrice(
                                                             item.id,
-                                                            Number(e.target.value),
+                                                            e.target.value,
                                                             item.batchId ?? undefined
                                                         )
                                                     }
-                                                    className={`w-full text-right border rounded-lg md:rounded-md pl-6 pr-2 py-2 md:py-1 font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none outline-none transition-all text-sm md:text-xs ${item.price <= item.cost
+                                                    onFocus={(e) => e.target.select()}
+                                                    className={`w-full text-right border rounded-lg md:rounded-md pl-6 pr-2 py-2 md:py-1 font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none outline-none transition-all text-sm md:text-xs ${parseFloat(item.price || "0") <= item.cost
                                                         ? "border-rose-500 text-rose-600 bg-rose-50 focus:ring-rose-100"
                                                         : "border-gray-200 text-gray-700 focus:ring-primary-100"
                                                         }`}
@@ -124,6 +125,7 @@ const Summary = ({ cart, cartTotal, paidAmount, setPaidAmount, isQuotation, setI
                                                     )
                                                 }
                                                 className="w-12 md:w-10 text-center border border-transparent font-black text-primary-600 focus:outline-none bg-transparent text-lg md:text-xs"
+                                                onFocus={(e) => e.target.select()}
                                             />
                                             <button
                                                 onClick={() => updateQty(item.id, item.qty + 1, item.batchId ?? undefined)}
@@ -135,7 +137,7 @@ const Summary = ({ cart, cartTotal, paidAmount, setPaidAmount, isQuotation, setI
 
                                         {/* Total */}
                                         <div className="text-right font-black text-gray-900 text-[15px] md:text-xs md:col-span-2">
-                                            Rs. {(item.price * item.qty).toLocaleString()}
+                                            Rs. {(Number(item.price) * item.qty).toLocaleString()}
                                         </div>
 
                                         {/* Remove (Desktop) */}
@@ -173,8 +175,8 @@ const Summary = ({ cart, cartTotal, paidAmount, setPaidAmount, isQuotation, setI
                             <div className="space-y-1">
                                 <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest flex justify-between">
                                     Cash Received
-                                    {paidAmount !== cartTotal && (
-                                        <button className="text-primary-600 font-black hover:underline lowercase" onClick={() => setPaidAmount(cartTotal)}>Reset to Full</button>
+                                    {parseFloat(paidAmount) !== cartTotal && (
+                                        <button className="text-primary-600 font-black hover:underline lowercase" onClick={() => setPaidAmount(cartTotal.toString())}>Reset to Full</button>
                                     )}
                                 </label>
                                 <div className="relative">
@@ -182,7 +184,7 @@ const Summary = ({ cart, cartTotal, paidAmount, setPaidAmount, isQuotation, setI
                                     <input
                                         type="number"
                                         value={paidAmount || ''}
-                                        onChange={(e) => setPaidAmount(Number(e.target.value))}
+                                        onChange={(e) => setPaidAmount(e.target.value)}
                                         onFocus={(e) => e.target.select()}
                                         placeholder="0.00"
                                         className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-4 focus:ring-primary-50 outline-none transition-all text-sm font-bold text-gray-900"

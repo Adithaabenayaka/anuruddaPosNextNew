@@ -3,7 +3,7 @@ export interface SaleItem {
     id: string; // The Firestore document ID
     productId: string; // The custom SKU-XXX ID
     productName: string;
-    price: number;
+    price: string;
     originalPrice?: number | null;
     cost: number;
     qty: number;

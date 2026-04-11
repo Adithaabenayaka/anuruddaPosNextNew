@@ -32,7 +32,7 @@ export default function SalesPage() {
   const [showCustomerResults, setShowCustomerResults] = useState(false);
   const [cart, setCart] = useState<SaleItem[]>([]);
   const [isQuotation, setIsQuotation] = useState(false);
-  const [paidAmount, setPaidAmount] = useState<number>(0);
+  const [paidAmount, setPaidAmount] = useState<string>("0");
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -77,7 +77,7 @@ export default function SalesPage() {
           setCustomerSearch(sale.buyerName);
           setSelectedCustomerId(sale.customerId || null);
           setCart(sale.items);
-          setPaidAmount(sale.paidAmount || 0);
+          setPaidAmount(sale.paidAmount?.toString() || "0");
           setIsQuotation(false); // drafts are not quotations by default in this flow
         } else if (sale) {
           alert("Only draft orders can be resumed.");
@@ -145,7 +145,7 @@ export default function SalesPage() {
           id: product.id!,
           productId: product.productId,
           productName: product.productName,
-          price: itemPrice,
+          price: itemPrice.toString(),
           originalPrice: itemPrice !== itemOriginalPrice ? itemOriginalPrice : null,
           cost: itemCost,
           qty: 1,
@@ -168,7 +168,7 @@ export default function SalesPage() {
     );
   };
 
-  const updatePrice = (id: string, price: number, batchId?: string) => {
+  const updatePrice = (id: string, price: string, batchId?: string) => {
     setCart((prev) =>
       prev.map((item) => {
         if (item.id === id && item.batchId === (batchId || null)) {
@@ -184,20 +184,20 @@ export default function SalesPage() {
   };
 
   const cartTotal = useMemo(
-    () => cart.reduce((total, item) => total + item.price * item.qty, 0),
+    () => cart.reduce((total, item) => total + (parseFloat(item.price) || 0) * item.qty, 0),
     [cart]
   );
 
   // Default paidAmount to total when items added
   useEffect(() => {
-    setPaidAmount(cartTotal);
+    setPaidAmount(cartTotal.toString());
   }, [cartTotal]);
 
-  const balanceAmount = useMemo(() => Math.max(0, cartTotal - paidAmount), [cartTotal, paidAmount]);
+  const balanceAmount = useMemo(() => Math.max(0, cartTotal - parseFloat(paidAmount || "0")), [cartTotal, paidAmount]);
 
   const derivedStatus = useMemo((): SaleStatus => {
     if (isQuotation) return 'quotation';
-    return paidAmount >= cartTotal ? 'completed' : 'pending-payment';
+    return parseFloat(paidAmount || "0") >= cartTotal ? 'completed' : 'pending-payment';
   }, [isQuotation, paidAmount, cartTotal]);
 
   const filteredCustomers = useMemo(() => {
@@ -226,7 +226,7 @@ export default function SalesPage() {
       return;
     }
 
-    const invalidItems = cart.filter(item => item.price <= item.cost);
+    const invalidItems = cart.filter(item => parseFloat(item.price) <= item.cost);
     if (invalidItems.length > 0) {
       alert(`Some items have selling prices below or equal to their cost. Please adjust them before completing the order.`);
       return;
@@ -265,7 +265,7 @@ export default function SalesPage() {
       setSelectedCustomerId(null);
       setCustomerSearch("");
       setSearchTerm("");
-      setPaidAmount(0);
+      setPaidAmount("0");
       setIsQuotation(false);
     } catch (error: any) {
       console.error("Sale processing failed:", error);
@@ -285,7 +285,7 @@ export default function SalesPage() {
       return;
     }
 
-    const invalidItems = cart.filter(item => item.price <= item.cost);
+    const invalidItems = cart.filter(item => parseFloat(item.price) <= item.cost);
     if (invalidItems.length > 0) {
       alert(`Some items have selling prices below or equal to their cost. Please adjust them before saving the draft.`);
       return;
@@ -318,7 +318,7 @@ export default function SalesPage() {
       setSelectedCustomerId(null);
       setCustomerSearch("");
       setSearchTerm("");
-      setPaidAmount(0);
+      setPaidAmount("0");
       setIsQuotation(false);
     } catch (error: any) {
       console.error("Draft saving failed:", error);
