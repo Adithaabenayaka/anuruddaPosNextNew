@@ -5,6 +5,7 @@ export interface SaleItem {
     productName: string;
     price: string;
     originalPrice?: number | null;
+    catalogPrice?: number | null;
     cost: number;
     qty: number;
     batchId?: string | null; // Link to specific product batch

@@ -49,26 +49,43 @@ const Summary = ({ cart, cartTotal, paidAmount, setPaidAmount, isQuotation, setI
 
                 </header>
 
+                {/* Header for Desktop Table */}
+                <div className="hidden md:grid md:grid-cols-12 md:gap-4 px-6 py-3 bg-gray-50 border-b border-gray-100 text-[10px] font-black text-gray-500 uppercase tracking-widest no-print">
+                    <div className="col-span-3 flex items-center gap-2">
+                        <FileText size={12} className="text-gray-400" />
+                        Item / Batch
+                    </div>
+                    <div className="col-span-1 text-right">Cost</div>
+                    <div className="col-span-1 text-right">Orig.</div>
+                    <div className="col-span-1 text-right">S. Price</div>
+                    <div className="col-span-2 text-right">Manual Pr.</div>
+                    <div className="col-span-2 text-center">Quantity</div>
+                    <div className="col-span-1 text-right">Total</div>
+                    <div className="col-span-1"></div>
+                </div>
+
                 {/* Cart Items List */}
-                <div className="p-3 flex-1 max-h-[350px] overflow-y-auto">
+                <div className="flex-1 max-h-[450px] overflow-y-auto">
                     {cart.length > 0 ? (
-                        <div className="space-y-2">
+                        <div className="divide-y divide-gray-50">
                             {cart.map((item) => (
                                 <div
                                     key={item.id + (item.batchId || "")}
-                                    className="flex flex-col gap-3 p-3 bg-white border border-gray-100 rounded-xl shadow-sm md:grid md:grid-cols-12 md:items-center md:gap-4 md:px-3 md:py-2 md:text-xs md:shadow-none md:border-transparent md:border-b"
+                                    className="flex flex-col gap-3 p-4 bg-white md:grid md:grid-cols-12 md:items-center md:gap-4 md:px-6 md:py-3 transition-colors hover:bg-gray-50/50"
                                 >
                                     {/* Product & Remove (Mobile) */}
-                                    <div className="flex justify-between items-start md:col-span-5">
-                                        <div className="flex flex-col">
-                                            <span className="font-bold text-gray-800 text-[14px] md:text-xs truncate">
+                                    <div className="flex justify-between items-start md:col-span-3">
+                                        <div className="flex flex-col min-w-0">
+                                            <span className="font-bold text-gray-900 text-[15px] md:text-sm truncate">
                                                 {item.productName}
                                             </span>
-                                            {item.batchLabel && (
-                                                <span className="text-[10px] md:text-[9px] text-primary-500 font-bold uppercase tracking-wider">
-                                                    {item.batchLabel}  -  ({item.cost})
-                                                </span>
-                                            )}
+                                            <div className="flex flex-wrap gap-2 mt-0.5">
+                                                {item.batchLabel && (
+                                                    <span className="text-[10px] md:text-[9px] bg-primary-50 text-primary-600 font-black uppercase tracking-wider px-1.5 py-0.5 rounded border border-primary-100">
+                                                        {item.batchLabel}
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
                                         <button
                                             onClick={() =>
@@ -76,16 +93,48 @@ const Summary = ({ cart, cartTotal, paidAmount, setPaidAmount, isQuotation, setI
                                             }
                                             className="md:hidden text-gray-400 hover:text-rose-500 transition-colors p-1"
                                         >
-                                            <Trash2 size={16} />
+                                            <Trash2 size={18} />
                                         </button>
                                     </div>
 
+                                    {/* Mobile-only Metadata Grid */}
+                                    <div className="md:hidden grid grid-cols-3 gap-2 py-2 border-y border-gray-50 bg-gray-50/50 px-2.5 rounded-xl text-[10px]">
+                                        <div className="flex flex-col">
+                                            <span className="text-gray-400 font-black uppercase tracking-tighter text-[8px]">Cost</span>
+                                            <span className="font-bold text-gray-600">Rs. {item.cost.toLocaleString()}</span>
+                                        </div>
+                                        <div className="flex flex-col border-x border-gray-100 px-2">
+                                            <span className="text-gray-400 font-black uppercase tracking-tighter text-[8px]">Orig.</span>
+                                            <span className="font-bold text-gray-500">{item.originalPrice ? `Rs. ${item.originalPrice.toLocaleString()}` : '-'}</span>
+                                        </div>
+                                        <div className="flex flex-col pl-1">
+                                            <span className="text-gray-400 font-black uppercase tracking-tighter text-[8px]">Catalog</span>
+                                            <span className="font-bold text-primary-500">{item.catalogPrice ? `Rs. ${item.catalogPrice.toLocaleString()}` : '-'}</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Cost (Desktop) */}
+                                    <div className="hidden md:block md:col-span-1 text-right text-[11px] font-bold text-gray-400">
+                                        Rs. {item.cost.toLocaleString()}
+                                    </div>
+
+                                    {/* Original Price (Desktop) */}
+                                    <div className="hidden md:block md:col-span-1 text-right text-[11px] font-bold text-gray-400">
+                                        {item.originalPrice ? `Rs. ${item.originalPrice.toLocaleString()}` : '-'}
+                                    </div>
+
+                                    {/* Catalog Selling Price (Desktop) */}
+                                    <div className="hidden md:block md:col-span-1 text-right text-[11px] font-bold text-primary-500">
+                                        {item.catalogPrice ? `Rs. ${item.catalogPrice.toLocaleString()}` : '-'}
+                                    </div>
+
                                     {/* Controls & Prices Container */}
-                                    <div className="flex flex-wrap items-center justify-between gap-4 md:col-span-7 md:grid md:grid-cols-7 md:gap-2">
-                                        {/* Price Input */}
-                                        <div className="w-[100px] md:col-span-2 md:w-auto">
+                                    <div className="flex flex-wrap items-center justify-between gap-4 md:col-span-6 md:grid md:grid-cols-6 md:gap-4">
+                                        {/* Selling Price Input */}
+                                        <div className="w-[120px] md:col-span-2 md:w-auto">
+                                            <label className="md:hidden text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1 block">Manual Price</label>
                                             <div className="relative">
-                                                <span className="absolute left-1.5 top-1/2 -translate-y-1/2 text-[10px] md:text-[8px] text-gray-400 font-bold">Rs.</span>
+                                                <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[10px] md:text-[9px] text-gray-400 font-bold">Rs.</span>
                                                 <input
                                                     type="number"
                                                     value={item.price || ''}
@@ -97,47 +146,53 @@ const Summary = ({ cart, cartTotal, paidAmount, setPaidAmount, isQuotation, setI
                                                         )
                                                     }
                                                     onFocus={(e) => e.target.select()}
-                                                    className={`w-full text-right border rounded-lg md:rounded-md pl-6 pr-2 py-2 md:py-1 font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none outline-none transition-all text-sm md:text-xs ${parseFloat(item.price || "0") <= item.cost
+                                                    className={`w-full text-right border rounded-xl md:rounded-lg pl-8 pr-2.5 py-2.5 md:py-1.5 font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none outline-none transition-all text-[15px] md:text-sm ${parseFloat(item.price || "0") <= item.cost
                                                         ? "border-rose-500 text-rose-600 bg-rose-50 focus:ring-rose-100"
-                                                        : "border-gray-200 text-gray-700 focus:ring-primary-100"
+                                                        : "border-gray-200 text-gray-900 focus:border-primary-300 focus:ring-4 focus:ring-primary-50"
                                                         }`}
                                                 />
                                             </div>
                                         </div>
 
                                         {/* Qty Control with Buttons */}
-                                        <div className="flex items-center gap-1 md:col-span-2 md:justify-center">
-                                            <button
-                                                onClick={() => updateQty(item.id, Math.max(1, item.qty - 1), item.batchId ?? undefined)}
-                                                className="w-10 h-10 md:w-7 md:h-7 flex items-center justify-center rounded-lg md:rounded-md border border-gray-200 text-gray-500 bg-white hover:bg-gray-50 active:scale-90 transition-all shadow-sm"
-                                            >
-                                                <Minus size={14} />
-                                            </button>
-                                            <input
-                                                type="number"
-                                                min={1}
-                                                value={item.qty}
-                                                onChange={(e) =>
-                                                    updateQty(
-                                                        item.id,
-                                                        Number(e.target.value),
-                                                        item.batchId ?? undefined
-                                                    )
-                                                }
-                                                className="w-12 md:w-10 text-center border border-transparent font-black text-primary-600 focus:outline-none bg-transparent text-lg md:text-xs"
-                                                onFocus={(e) => e.target.select()}
-                                            />
-                                            <button
-                                                onClick={() => updateQty(item.id, item.qty + 1, item.batchId ?? undefined)}
-                                                className="w-10 h-10 md:w-7 md:h-7 flex items-center justify-center rounded-lg md:rounded-md border border-gray-200 text-gray-500 bg-white hover:bg-gray-50 active:scale-90 transition-all shadow-sm"
-                                            >
-                                                <Plus size={14} />
-                                            </button>
+                                        <div className="md:col-span-2 flex flex-col md:items-center">
+                                            <label className="md:hidden text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1 block">Quantity</label>
+                                            <div className="flex items-center gap-1">
+                                                <button
+                                                    onClick={() => updateQty(item.id, Math.max(1, item.qty - 1), item.batchId ?? undefined)}
+                                                    className="w-10 h-10 md:w-8 md:h-8 flex items-center justify-center rounded-xl md:rounded-lg border border-gray-200 text-gray-500 bg-white hover:bg-gray-50 active:scale-95 transition-all shadow-sm"
+                                                >
+                                                    <Minus size={14} />
+                                                </button>
+                                                <input
+                                                    type="number"
+                                                    min={1}
+                                                    value={item.qty}
+                                                    onChange={(e) =>
+                                                        updateQty(
+                                                            item.id,
+                                                            Number(e.target.value),
+                                                            item.batchId ?? undefined
+                                                        )
+                                                    }
+                                                    className="w-14 md:w-10 text-center border-0 font-black text-primary-600 focus:outline-none bg-transparent text-xl md:text-sm"
+                                                    onFocus={(e) => e.target.select()}
+                                                />
+                                                <button
+                                                    onClick={() => updateQty(item.id, item.qty + 1, item.batchId ?? undefined)}
+                                                    className="w-10 h-10 md:w-8 md:h-8 flex items-center justify-center rounded-xl md:rounded-lg border border-gray-200 text-gray-500 bg-white hover:bg-gray-50 active:scale-95 transition-all shadow-sm"
+                                                >
+                                                    <Plus size={14} />
+                                                </button>
+                                            </div>
                                         </div>
 
                                         {/* Total */}
-                                        <div className="text-right font-black text-gray-900 text-[15px] md:text-xs md:col-span-2">
-                                            Rs. {(Number(item.price) * item.qty).toLocaleString()}
+                                        <div className="md:col-span-1 text-right flex flex-col md:items-end">
+                                            <label className="md:hidden text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1 block">Subtotal</label>
+                                            <span className="font-black text-gray-900 text-lg md:text-sm">
+                                                Rs. {(parseFloat(item.price || "0") * item.qty).toLocaleString()}
+                                            </span>
                                         </div>
 
                                         {/* Remove (Desktop) */}
@@ -146,9 +201,9 @@ const Summary = ({ cart, cartTotal, paidAmount, setPaidAmount, isQuotation, setI
                                                 onClick={() =>
                                                     removeFromCart(item.id, item.batchId ?? undefined)
                                                 }
-                                                className="text-gray-300 hover:text-rose-500 transition-colors"
+                                                className="text-gray-300 hover:text-rose-500 hover:bg-rose-50 p-2 rounded-lg transition-all"
                                             >
-                                                <Trash2 size={14} />
+                                                <Trash2 size={16} />
                                             </button>
                                         </div>
                                     </div>
@@ -156,8 +211,9 @@ const Summary = ({ cart, cartTotal, paidAmount, setPaidAmount, isQuotation, setI
                             ))}
                         </div>
                     ) : (
-                        <div className="py-10 text-center text-gray-300 text-xs">
-                            Cart is empty
+                        <div className="py-20 text-center flex flex-col items-center gap-3">
+                            <ShoppingCart className="text-gray-100" size={48} />
+                            <p className="text-gray-300 text-xs font-bold uppercase tracking-[0.2em]">Your cart is empty</p>
                         </div>
                     )}
                 </div>

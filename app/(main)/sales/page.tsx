@@ -147,6 +147,7 @@ export default function SalesPage() {
           productName: product.productName,
           price: itemPrice.toString(),
           originalPrice: itemPrice !== itemOriginalPrice ? itemOriginalPrice : null,
+          catalogPrice: itemPrice,
           cost: itemCost,
           qty: 1,
           batchId: activeBatchId || null,
