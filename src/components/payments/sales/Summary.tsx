@@ -66,7 +66,7 @@ const Summary = ({ cart, cartTotal, paidAmount, setPaidAmount, isQuotation, setI
                                             </span>
                                             {item.batchLabel && (
                                                 <span className="text-[10px] md:text-[9px] text-primary-500 font-bold uppercase tracking-wider">
-                                                    {item.batchLabel}
+                                                    {item.batchLabel}  -  ({item.cost})
                                                 </span>
                                             )}
                                         </div>

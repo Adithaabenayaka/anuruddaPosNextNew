@@ -50,7 +50,7 @@ const AddNewProductForm: React.FC<AddNewProductFormProps> = ({
             placeholder="Enter name"
           />
         </div>
-        
+
         <div className="md:col-span-2 space-y-1">
           <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Image URL</label>
           <input
@@ -70,8 +70,8 @@ const AddNewProductForm: React.FC<AddNewProductFormProps> = ({
               onClick={() => {
                 const newBatch = {
                   id: `batch_${Date.now()}`,
-                  cost: formData.cost || 0,
-                  price: formData.price || 0,
+                  cost: formData.cost || "",
+                  price: formData.price || "",
                   discountedPrice: formData.discountedPrice || undefined,
                   availableQty: 0,
                   createdAt: new Date().toISOString(),
@@ -155,11 +155,11 @@ const AddNewProductForm: React.FC<AddNewProductFormProps> = ({
                       onChange={(e) => {
                         const updated = [...formData.batches!];
                         updated[index].availableQty = Number(e.target.value);
-                        
+
                         // Sync top-level fields from the first batch
                         const firstBatch = updated[0] || {};
                         const totalQty = updated.reduce((sum, b) => sum + b.availableQty, 0);
-                        
+
                         handleChange({ target: { name: 'batches', value: updated } } as any);
                         handleChange({ target: { name: 'availableQty', value: totalQty, type: 'number' } } as any);
                         if (updated[0]) {

@@ -141,9 +141,9 @@ export default function AddingPage() {
         accessor: (product: Product) => (
           <div className="flex items-center gap-2">
             <button
-               title="Modify Product"
-               onClick={() => handleEdit(product)}
-               className="p-2 rounded-lg bg-primary-50 text-primary-600 hover:bg-primary-100 transition-all hover:scale-110"
+              title="Modify Product"
+              onClick={() => handleEdit(product)}
+              className="p-2 rounded-lg bg-primary-50 text-primary-600 hover:bg-primary-100 transition-all hover:scale-110"
             >
               <Pencil size={18} />
             </button>
