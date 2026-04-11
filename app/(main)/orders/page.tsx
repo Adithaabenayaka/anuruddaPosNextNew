@@ -46,7 +46,7 @@ export default function OrdersPage() {
         .filter(sale => sale.status === "completed")
         .reduce((orderSum, order) => {
             const orderProfit = order.items.reduce((itemSum, item) => {
-                return itemSum + ((item.price - item.cost) * item.qty);
+                return itemSum + ((parseFloat(item.price) - item.cost) * item.qty);
             }, 0);
 
             return orderSum + orderProfit;
@@ -512,7 +512,7 @@ export default function OrdersPage() {
                                                     </div>
                                                 </div>
                                                 <div className="text-right text-gray-900 font-black text-xs">
-                                                    Rs. {(item.price * item.qty).toLocaleString()}
+                                                    Rs. {(parseFloat(item.price) * item.qty).toLocaleString()}
                                                 </div>
                                             </div>
                                         ))}

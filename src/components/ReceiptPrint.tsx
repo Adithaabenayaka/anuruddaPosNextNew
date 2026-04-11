@@ -13,13 +13,13 @@ const ReceiptPrint = ({ sale }: ReceiptPrintProps) => {
 
     const { selectedBankDetail } = useBankDetails();
     const subtotal = sale.items.reduce(
-        (acc, item) => acc + (item.originalPrice ?? item.price) * item.qty,
+        (acc, item) => acc + Number(item.originalPrice ?? item.price) * Number(item.qty),
         0
     );
 
     const totalDiscount = sale.items.reduce((acc, item) => {
-        if (item.originalPrice && item.originalPrice > item.price) {
-            return acc + (item.originalPrice - item.price) * item.qty;
+        if (item.originalPrice && Number(item.originalPrice) > Number(item.price)) {
+            return acc + (Number(item.originalPrice) - Number(item.price)) * Number(item.qty);
         }
         return acc;
     }, 0);
@@ -109,23 +109,23 @@ const ReceiptPrint = ({ sale }: ReceiptPrintProps) => {
 
                             {/* MRP */}
                             <div className="text-right">
-                                {item.originalPrice && item.originalPrice > item.price ? (
+                                {item.originalPrice && Number(item.originalPrice) > Number(item.price) ? (
                                     <span className="text-gray-400">
-                                        {formatLKR(item.originalPrice)}
+                                        {formatLKR(Number(item.originalPrice))}
                                     </span>
                                 ) : (
-                                    formatLKR(item.price)
+                                    formatLKR(Number(item.price))
                                 )}
                             </div>
 
                             {/* RATE */}
                             <div className="text-right">
-                                {formatLKR(item.price)}
+                                {formatLKR(Number(item.price))}
                             </div>
 
                             {/* AMOUNT */}
                             <div className="text-right">
-                                {formatLKR(item.qty * item.price)}
+                                {formatLKR(Number(item.price) * Number(item.qty))}
                             </div>
                         </div>
                     ))}

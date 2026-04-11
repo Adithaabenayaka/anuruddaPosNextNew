@@ -71,7 +71,7 @@ const SuccessModal = ({ lastProcessedSale, setShowSuccessModal, setLastProcessed
                                         <div>
                                             <p className="font-bold text-gray-900 text-xs">{item.productName}</p>
                                             <div className="flex items-center gap-1.5 mt-0.5">
-                                                {item.originalPrice && item.originalPrice !== item.price && (
+                                                {item.originalPrice && Number(item.originalPrice) !== Number(item.price) && (
                                                     <p className="text-[8px] text-gray-400 line-through">Rs. {item.originalPrice.toLocaleString()}</p>
                                                 )}
                                                 <p className="text-[9px] text-gray-600 font-medium">Rs. {item.price.toLocaleString()}</p>
@@ -79,7 +79,7 @@ const SuccessModal = ({ lastProcessedSale, setShowSuccessModal, setLastProcessed
                                         </div>
                                     </div>
                                     <div className="text-right text-gray-900 font-black text-xs">
-                                        Rs. {(item.price * item.qty).toLocaleString()}
+                                        Rs. {(Number(item.price) * Number(item.qty)).toLocaleString()}
                                     </div>
                                 </div>
                             ))}
