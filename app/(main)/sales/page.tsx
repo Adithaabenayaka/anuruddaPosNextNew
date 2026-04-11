@@ -551,9 +551,9 @@ export default function SalesPage() {
         />
       )}
 
-      {/* Print-only Container */}
+      {/* PDF & Print Container */}
       {lastProcessedSale && (
-        <div className="print-only">
+        <div className="pdf-target">
           <ReceiptPrint sale={lastProcessedSale} />
         </div>
       )}

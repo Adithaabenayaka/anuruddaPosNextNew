@@ -71,6 +71,12 @@
       display: block !important;
     }
 
+    .pdf-target {
+      position: static !important;
+      left: auto !important;
+      z-index: auto !important;
+    }
+
     body {
       background-color: white !important;
     }
@@ -110,6 +116,13 @@
     font-weight: var(--font-weight-normal);
     line-height: var(--line-height-h1);
     letter-spacing: var(--letter-spacing-default);
+  }
+  .pdf-target {
+    position: absolute;
+    top: 0;
+    left: -9999px;
+    z-index: -1;
+    background: white;
   }
 }
 

@@ -38,8 +38,35 @@ const ReceiptPrint = ({ sale }: ReceiptPrintProps) => {
 
     return (
         <div className="receipt-print-container bg-white text-black font-sans flex justify-center">
+            {/* 
+                Legacy color overrides for html2canvas compatibility. 
+                Tailwind v4 uses modern CSS color functions (oklch) which html2canvas cannot yet parse.
+            */}
+            <style>{`
+                .receipt-print-container, .receipt-print-container * {
+                    box-sizing: border-box;
+                }
+                .receipt-print-container {
+                    background-color: #ffffff !important;
+                    color: #000000 !important;
+                }
+                .text-gray-400 { color: #9ca3af !important; }
+                .text-gray-500 { color: #6b7280 !important; }
+                .text-gray-600 { color: #4b5563 !important; }
+                .text-gray-800 { color: #1f2937 !important; }
+                .text-primary-600 { color: #e67f1f !important; }
+                .text-primary-400 { color: #ffa94a !important; }
+                .text-emerald-500 { color: #10b981 !important; }
+                .text-emerald-900 { color: #064e3b !important; }
+                .bg-primary-50 { background-color: #fff4e8 !important; }
+                .bg-emerald-50 { background-color: #ecfdf5 !important; }
+                .border-b { border-bottom: 1px solid #e5e7eb !important; }
+                .border-t { border-top: 1px solid #e5e7eb !important; }
+                .border { border: 1px solid #e5e7eb !important; }
+            `}</style>
             {/* Paper wrapper */}
             <div
+                id="receipt-content"
                 className={`bg-white ${isQuotation ? "w-[850px] " : "w-[500px]"}`}
             >
 
