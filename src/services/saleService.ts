@@ -1,12 +1,14 @@
-import { firebaseService } from './firebaseService';
+// src/services/saleService.ts
+import { BaseService } from './baseService';
 import { CreateSaleInput, Sale } from '../types/sale';
-import { ProductBatch } from '../types/product';
 import { productService } from './productService';
 import { paymentService } from './paymentService';
 
-const SALES_COLLECTION = 'sales';
+class SaleService extends BaseService<Sale> {
+    constructor() {
+        super('sales');
+    }
 
-export const saleService = {
     /**
      * Process a new sale record.
      * Deducts inventory quantities first.
@@ -71,11 +73,10 @@ export const saleService = {
                         updateData.cost = firstActiveBatch.cost;
                     }
 
-                    await productService.updateProduct(item.id, updateData);
+                    await productService.updateProduct(item.id!, updateData);
                 }
             }
 
-            const nowIso = new Date().toISOString();
             const initialPaidAmount = input.paidAmount || 0;
             const initialBalanceAmount = input.balanceAmount ?? Math.max(input.total - initialPaidAmount, 0);
 
@@ -84,48 +85,39 @@ export const saleService = {
                     {
                         id: `pay_${Date.now()}`,
                         amount: initialPaidAmount,
-                        paidAt: nowIso,
+                        paidAt: new Date().toISOString(),
                         paidAmountAfter: initialPaidAmount,
                         balanceAmountAfter: initialBalanceAmount,
                     }
                 ]
                 : [];
 
-            // 2. Save sale record
-            const result = await firebaseService.addDocument(SALES_COLLECTION, {
+            // 2. Save sale record using BaseService.create
+            return await this.create({
                 ...input,
                 paymentTransactions: initialPaymentTransactions,
-                createdAt: nowIso,
-                updatedAt: nowIso
-            });
-
-            return result as Sale;
+            } as any);
         } catch (error) {
-            console.error('[saleService] processSale failing:', error);
+            console.error('[SaleService] processSale failing:', error);
             throw error;
         }
-    },
+    }
 
     /**
      * Fetch a single sale record by ID
      */
     async getSaleById(id: string): Promise<Sale | null> {
-        return firebaseService.getDocument(SALES_COLLECTION, id) as Promise<Sale | null>;
-    },
+        return this.getById(id);
+    }
 
     /**
      * Update an existing sale record
      */
     async updateSale(id: string, input: Partial<Sale>): Promise<Sale> {
-        // If updating status to something other than draft/quotation, we might need inventory deduction
-        // But for simplicity in this POS, we usually deduct on "process" (conversion from draft to sale)
-        // If we transition from draft -> completed, we should trigger inventory deduction.
-        
-        // Let's handle the transition from draft/quotation to completed/pending-payment
+        // Transition logic from draft/quotation to completed/pending-payment
         if (input.status && (input.status === 'completed' || input.status === 'pending-payment')) {
             const existingSale = await this.getSaleById(id);
             if (existingSale && (existingSale.status === 'draft' || existingSale.status === 'quotation')) {
-                // Deduct inventory now using the NEW items (in case they were modified during resume)
                 const itemsToDeduct = input.items || existingSale.items;
                 const currentProducts = await productService.getAllProducts();
 
@@ -150,7 +142,7 @@ export const saleService = {
                     }
 
                     const totalQty = updatedBatches.length > 0 ? updatedBatches.reduce((sum, b) => sum + b.availableQty, 0) : targetProduct.availableQty;
-                    await productService.updateProduct(item.id, {
+                    await productService.updateProduct(item.id!, {
                         availableQty: totalQty,
                         batches: updatedBatches
                     });
@@ -158,9 +150,8 @@ export const saleService = {
             }
         }
 
-        const result = await firebaseService.updateDocument(SALES_COLLECTION, id, input);
-        return result as Sale;
-    },
+        return this.update(id, input);
+    }
 
     /**
      * Delete a sale record and restore inventory if needed.
@@ -172,35 +163,26 @@ export const saleService = {
                 throw new Error("Sale not found.");
             }
 
-            // Restore inventory ONLY if it was deducted (not for quotations or drafts)
+            // Restore inventory ONLY if it was deducted
             if (sale.status === 'completed' || sale.status === 'pending-payment') {
                 const currentProducts = await productService.getAllProducts();
 
                 for (const item of sale.items) {
                     const targetProduct = currentProducts.find(p => p.id === item.id);
-                    if (!targetProduct) {
-                        console.warn(`[saleService] Product ${item.productName} (${item.id}) not found during inventory restoration.`);
-                        continue;
-                    }
+                    if (!targetProduct) continue;
 
                     let updatedBatches = [...(targetProduct.batches || [])];
                     const qtyToRestore = item.qty;
 
                     if (updatedBatches.length > 0) {
-                        // Try to find the batch by label to be more accurate
                         let batchIndex = updatedBatches.findIndex(b => b.label === item.batchLabel);
-                        
-                        // If not found by label, fall back to the first batch
-                        if (batchIndex === -1) {
-                            batchIndex = 0;
-                        }
+                        if (batchIndex === -1) batchIndex = 0;
 
                         updatedBatches[batchIndex] = {
                             ...updatedBatches[batchIndex],
                             availableQty: updatedBatches[batchIndex].availableQty + qtyToRestore
                         };
                     } else {
-                        // Legacy support for products without batches
                         targetProduct.availableQty += qtyToRestore;
                     }
 
@@ -208,38 +190,34 @@ export const saleService = {
                         ? updatedBatches.reduce((sum, b) => sum + b.availableQty, 0) 
                         : targetProduct.availableQty;
 
-                    await productService.updateProduct(item.id, {
+                    await productService.updateProduct(item.id!, {
                         availableQty: totalQty,
                         batches: updatedBatches
                     });
                 }
             }
 
-            return await firebaseService.deleteDocument(SALES_COLLECTION, id);
+            await this.delete(id);
+            return id;
         } catch (error) {
-            console.error('[saleService] deleteSale error:', error);
+            console.error('[SaleService] deleteSale error:', error);
             throw error;
         }
-    },
+    }
 
     /**
      * Fetch all sales records
      */
     async getAllSales(): Promise<Sale[]> {
-        try {
-            const results = await firebaseService.getDocuments(SALES_COLLECTION);
-            return results as Sale[];
-        } catch (error) {
-            console.error('[saleService] getAllSales error:', error);
-            throw new Error('Failed to fetch sales history');
-        }
-    },
+        return this.getAll();
+    }
 
     /**
      * Add a part/full payment to an existing pending sale.
-     * Redirects to paymentService.
      */
     async addPayment(saleId: string, amount: number): Promise<Sale> {
         return paymentService.addPaymentToSale(saleId, amount);
     }
-};
+}
+
+export const saleService = new SaleService();

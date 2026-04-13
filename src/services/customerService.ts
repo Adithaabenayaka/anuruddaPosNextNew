@@ -1,66 +1,44 @@
-import { firebaseService } from './firebaseService';
-import { Customer, CreateCustomerInput, UpdateCustomerInput } from '../types/customer';
+// src/services/customerService.ts
+import { BaseService } from './baseService';
+import { Customer } from '../types/customer';
 
-const CUSTOMERS_COLLECTION = 'customers';
+class CustomerService extends BaseService<Customer> {
+    constructor() {
+        super('customers');
+    }
 
-export const customerService = {
     /**
-     * Register a new customer in the store.
+     * Backward compatibility wrapper for addCustomer
      */
-    async addCustomer(input: CreateCustomerInput): Promise<Customer> {
-        try {
-            const data = {
-                ...input,
-                loyaltyPoints: 0,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString()
-            };
-            const result = await firebaseService.addDocument(CUSTOMERS_COLLECTION, data);
-            return result as Customer;
-        } catch (error) {
-            console.error('[customerService] addCustomer error:', error);
-            throw new Error('Failed to register customer');
-        }
-    },
+    async addCustomer(input: Omit<Customer, 'id' | 'createdAt' | 'updatedAt'>): Promise<Customer> {
+        const data = {
+            ...input,
+            loyaltyPoints: 0,
+        };
+        return this.create(data as any);
+    }
 
     /**
-     * Retrieve all customers.
+     * Backward compatibility wrapper for getAllCustomers
      */
     async getAllCustomers(): Promise<Customer[]> {
-        try {
-            const results = await firebaseService.getDocuments(CUSTOMERS_COLLECTION);
-            return results as Customer[];
-        } catch (error) {
-            console.error('[customerService] getAllCustomers error:', error);
-            throw new Error('Failed to fetch customers list');
-        }
-    },
+        return this.getAll();
+    }
 
     /**
-     * Update customer details.
+     * Backward compatibility wrapper for updateCustomer
      */
-    async updateCustomer(id: string, input: UpdateCustomerInput): Promise<Customer> {
-        try {
-            const updated = await firebaseService.updateDocument(CUSTOMERS_COLLECTION, id, {
-                ...input,
-                updatedAt: new Date().toISOString()
-            });
-            return updated as Customer;
-        } catch (error) {
-            console.error('[customerService] updateCustomer error:', error);
-            throw new Error(`Failed to update customer with ID ${id}`);
-        }
-    },
+    async updateCustomer(id: string, input: Partial<Customer>): Promise<Customer> {
+        return this.update(id, input);
+    }
 
     /**
-     * Remove a customer.
+     * Backward compatibility wrapper for deleteCustomer
      */
     async deleteCustomer(id: string): Promise<string> {
-        try {
-            return await firebaseService.deleteDocument(CUSTOMERS_COLLECTION, id);
-        } catch (error) {
-            console.error('[customerService] deleteCustomer error:', error);
-            throw new Error(`Failed to remove customer with ID ${id}`);
-        }
+        await this.delete(id);
+        return id;
     }
-};
+}
+
+export const customerService = new CustomerService();
