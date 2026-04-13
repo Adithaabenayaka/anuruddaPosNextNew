@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
-import { Search, ShoppingCart, User, Plus, CheckCircle2, Printer, ArrowRight } from "lucide-react";
+import { Search, ShoppingCart, User, Plus, CheckCircle2, Printer, ArrowRight, CloudCog } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Product } from "@/src/types/product";
 import { Customer } from "@/src/types/customer";
@@ -329,9 +329,6 @@ export default function SalesPage() {
     }
   };
 
-  const handleCleanCart = () => {
-    setCart([]);
-  }
 
   return (
     <div className="relative overflow-y-auto  rounded-lg p-2 md:p-6">
@@ -512,6 +509,7 @@ export default function SalesPage() {
           {/* Right Side: Order Summary */}
           <Summary
             cart={cart}
+            setCart={setCart}
             cartTotal={cartTotal}
             paidAmount={paidAmount}
             setPaidAmount={setPaidAmount}
@@ -522,7 +520,6 @@ export default function SalesPage() {
             updatePrice={updatePrice}
             handleCheckout={handleCheckout}
             handleSaveDraft={handleSaveDraft}
-            handleCleanCart={handleCleanCart}
             isProcessing={isProcessing}
             derivedStatus={derivedStatus}
             balanceAmount={balanceAmount} />

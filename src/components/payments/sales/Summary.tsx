@@ -5,6 +5,7 @@ import CartItemRow from "@/src/common/CartItemRow";
 
 interface SummaryProps {
     cart: SaleItem[];
+    setCart: (cart: SaleItem[]) => void;
     cartTotal: number;
     paidAmount: string;
     setPaidAmount: (amount: string) => void;
@@ -15,15 +16,17 @@ interface SummaryProps {
     updatePrice: (id: string, price: string, batchId?: string) => void;
     handleCheckout: () => void;
     handleSaveDraft: () => void;
-    handleCleanCart: () => void;
     isProcessing: boolean;
     derivedStatus: SaleStatus;
     balanceAmount: number;
 }
 
 
-const Summary = ({ cart, cartTotal, paidAmount, setPaidAmount, isQuotation, setIsQuotation, removeFromCart, updateQty, updatePrice, handleCheckout, handleSaveDraft, handleCleanCart, isProcessing, derivedStatus, balanceAmount }: SummaryProps) => {
+const Summary = ({ cart, setCart, cartTotal, paidAmount, setPaidAmount, isQuotation, setIsQuotation, removeFromCart, updateQty, updatePrice, handleCheckout, handleSaveDraft, isProcessing, derivedStatus, balanceAmount }: SummaryProps) => {
 
+    const handleCleanCart = () => {
+        setCart([]);
+    }
 
     return (
         <div className="lg:col-span-6 sticky top-20">
