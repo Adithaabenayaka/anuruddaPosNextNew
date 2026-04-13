@@ -72,9 +72,6 @@ const Summary = ({ paidAmount, setPaidAmount, isQuotation, setIsQuotation, handl
                                 <CartItemRow
                                     key={item.id + (item.batchId || "")}
                                     item={item}
-                                    updateQty={updateQty}
-                                    updatePrice={updatePrice}
-                                    removeFromCart={removeFromCart}
                                 />
                             ))}
 
