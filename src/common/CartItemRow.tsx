@@ -3,20 +3,16 @@
 
 import { Minus, Plus, Trash2 } from "lucide-react";
 import { SaleItem } from "@/src/types/sale";
+import { useCart } from "@/src/context/CartContext";
 
 interface Props {
     item: SaleItem;
-    updateQty: (id: string, qty: number, batchId?: string) => void;
-    updatePrice: (id: string, price: string, batchId?: string) => void;
-    removeFromCart: (id: string, batchId?: string) => void;
 }
 
 export default function CartItemRow({
     item,
-    updateQty,
-    updatePrice,
-    removeFromCart,
 }: Props) {
+    const { updateQty, updatePrice, removeFromCart } = useCart();
     return (
         <div className="flex flex-col gap-3 p-4 bg-white md:grid md:grid-cols-12 md:items-center md:gap-4 md:px-6 md:py-3 hover:bg-gray-50/50 border border-gray-300 rounded-xl">
 

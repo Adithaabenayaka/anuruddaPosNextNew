@@ -9,6 +9,7 @@ import { SaleItem, SaleStatus, Sale } from "@/src/types/sale";
 import { useProducts } from "@/src/context/ProductsContext";
 import { useCustomers } from "@/src/context/CustomersContext";
 import { useSales } from "@/src/context/SalesContext";
+import { useCart } from "@/src/context/CartContext";
 import Button from "@/src/components/Button";
 import ReceiptPrint from "@/src/components/ReceiptPrint";
 import CloseButton from "@/src/components/CloseButton";
@@ -30,7 +31,7 @@ export default function SalesPage() {
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
   const [customerSearch, setCustomerSearch] = useState("");
   const [showCustomerResults, setShowCustomerResults] = useState(false);
-  const [cart, setCart] = useState<SaleItem[]>([]);
+  const { cart, setCart, addToCart, updateQty, updatePrice, removeFromCart, clearCart, cartTotal } = useCart();
   const [isQuotation, setIsQuotation] = useState(false);
   const [paidAmount, setPaidAmount] = useState<string>("0");
   const [isLoading, setIsLoading] = useState(true);
@@ -90,7 +91,7 @@ export default function SalesPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [loadCustomers, loadProducts, resumedSaleId, getSaleById, router]);
+  }, [loadCustomers, loadProducts, resumedSaleId, getSaleById, router, setCart]);
 
   useEffect(() => {
     fetchInitialData();
@@ -106,88 +107,6 @@ export default function SalesPage() {
         p.productId.toLowerCase().includes(term)
     );
   }, [searchTerm, products]);
-
-  // Cart Management
-  const addToCart = (product: Product, batchId?: string) => {
-    if (product.availableQty <= 0) {
-      alert("This item is out of stock!");
-      return;
-    }
-
-    const firstAvailableBatch = product.batches?.find(b => b.availableQty > 0);
-    const activeBatchId = firstAvailableBatch?.id;
-    const selectedBatch = product.batches?.find(b => b.id === activeBatchId);
-
-    // Determine the selling price vs original price
-    const batchPrice = selectedBatch ? selectedBatch.price : product.price;
-    const batchDiscountPrice = selectedBatch ? selectedBatch.discountedPrice : product.discountedPrice;
-    const itemOriginalPrice = batchPrice;
-    const itemPrice = batchDiscountPrice !== undefined && batchDiscountPrice > 0 ? batchDiscountPrice : batchPrice;
-    const itemCost = selectedBatch ? selectedBatch.cost : product.cost;
-
-    const itemAvailableQty = selectedBatch ? selectedBatch.availableQty : product.availableQty;
-
-    setCart((prev) => {
-      const existing = prev.find((item) => item.id === product.id && item.batchId === activeBatchId);
-      if (existing) {
-        if (existing.qty >= product.availableQty) {
-          alert(`Only ${product.availableQty} units available in total inventory.`);
-          return prev;
-        }
-        return prev.map((item) =>
-          (item.id === product.id && item.batchId === activeBatchId) ? { ...item, qty: item.qty + 1 } : item
-        );
-      }
-
-      return [
-        ...prev,
-        {
-          id: product.id!,
-          productId: product.productId,
-          productName: product.productName,
-          price: itemPrice.toString(),
-          originalPrice: itemPrice !== itemOriginalPrice ? itemOriginalPrice : null,
-          catalogPrice: itemPrice,
-          cost: itemCost,
-          qty: 1,
-          batchId: activeBatchId || null,
-          batchLabel: selectedBatch?.label || null,
-        },
-      ];
-    });
-  };
-
-  const updateQty = (id: string, qty: number, batchId?: string) => {
-    if (qty < 1) return;
-
-    setCart((prev) =>
-      prev.map((item) =>
-        item.id === id && item.batchId === batchId
-          ? { ...item, qty }
-          : item
-      )
-    );
-  };
-
-  const updatePrice = (id: string, price: string, batchId?: string) => {
-    setCart((prev) =>
-      prev.map((item) => {
-        if (item.id === id && item.batchId === (batchId || null)) {
-          return { ...item, price };
-        }
-        return item;
-      })
-    );
-  };
-
-  const removeFromCart = (id: string, batchId?: string) => {
-    setCart((prev) => prev.filter((item) => !(item.id === id && item.batchId === batchId)));
-  };
-
-  const cartTotal = useMemo(
-    () => cart.reduce((total, item) => total + (parseFloat(item.price) || 0) * item.qty, 0),
-    [cart]
-  );
 
   // Default paidAmount to total when items added
   useEffect(() => {
@@ -261,7 +180,7 @@ export default function SalesPage() {
       setShowSuccessModal(true);
 
       // Cleanup Cart UI
-      setCart([]);
+      clearCart();
       setBuyerName("");
       setSelectedCustomerId(null);
       setCustomerSearch("");
@@ -314,7 +233,7 @@ export default function SalesPage() {
       alert("Order saved as draft!");
 
       // Cleanup Cart UI
-      setCart([]);
+      clearCart();
       setBuyerName("");
       setSelectedCustomerId(null);
       setCustomerSearch("");
@@ -508,16 +427,10 @@ export default function SalesPage() {
 
           {/* Right Side: Order Summary */}
           <Summary
-            cart={cart}
-            setCart={setCart}
-            cartTotal={cartTotal}
             paidAmount={paidAmount}
             setPaidAmount={setPaidAmount}
             isQuotation={isQuotation}
             setIsQuotation={setIsQuotation}
-            removeFromCart={removeFromCart}
-            updateQty={updateQty}
-            updatePrice={updatePrice}
             handleCheckout={handleCheckout}
             handleSaveDraft={handleSaveDraft}
             isProcessing={isProcessing}

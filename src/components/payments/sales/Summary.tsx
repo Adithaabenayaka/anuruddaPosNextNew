@@ -1,19 +1,14 @@
-import { SaleItem, SaleStatus } from "@/src/types/sale";
-import { ShoppingCart, Trash2, Plus, Minus, CreditCard, ClipboardList, Wallet, CheckCircle2, FileText, Printer, ArrowRight } from "lucide-react";
+import { SaleStatus } from "@/src/types/sale";
+import { ShoppingCart, Trash2, CreditCard, ClipboardList, Wallet, FileText, Wallet2 } from "lucide-react";
 import Button from "@/src/components/Button";
 import CartItemRow from "@/src/common/CartItemRow";
+import { useCart } from "@/src/context/CartContext";
 
 interface SummaryProps {
-    cart: SaleItem[];
-    setCart: (cart: SaleItem[]) => void;
-    cartTotal: number;
     paidAmount: string;
     setPaidAmount: (amount: string) => void;
     isQuotation: boolean;
     setIsQuotation: (isQuotation: boolean) => void;
-    removeFromCart: (id: string, batchId?: string) => void;
-    updateQty: (id: string, qty: number, batchId?: string) => void;
-    updatePrice: (id: string, price: string, batchId?: string) => void;
     handleCheckout: () => void;
     handleSaveDraft: () => void;
     isProcessing: boolean;
@@ -22,10 +17,11 @@ interface SummaryProps {
 }
 
 
-const Summary = ({ cart, setCart, cartTotal, paidAmount, setPaidAmount, isQuotation, setIsQuotation, removeFromCart, updateQty, updatePrice, handleCheckout, handleSaveDraft, isProcessing, derivedStatus, balanceAmount }: SummaryProps) => {
+const Summary = ({ paidAmount, setPaidAmount, isQuotation, setIsQuotation, handleCheckout, handleSaveDraft, isProcessing, derivedStatus, balanceAmount }: SummaryProps) => {
+    const { cart, cartTotal, clearCart, updateQty, updatePrice, removeFromCart } = useCart();
 
     const handleCleanCart = () => {
-        setCart([]);
+        clearCart();
     }
 
     return (

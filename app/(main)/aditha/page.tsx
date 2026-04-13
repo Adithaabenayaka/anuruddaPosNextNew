@@ -1,8 +1,14 @@
 "use client";
+import { useCart } from "@/src/context/CartContext";
 import { generateInvoicePDF } from "@/src/services/pdfService";
-
+import { useEffect } from "react";
+import { CartItem } from "@/src/context/CartContext";
 
 export default function AddingPage() {
+
+    const { cart, addToCart } = useCart();
+
+    useEffect(() => { console.log(cart) }, [cart])
 
     const handleGenerate = () => {
         generateInvoicePDF({
@@ -37,9 +43,24 @@ export default function AddingPage() {
         });
     };
 
+    const handleClick = () => {
+
+        const cart1: CartItem = {
+            id: "",
+            productId: "",
+            productName: "",
+            price: "",
+            cost: 44,
+            qty: 0
+        }
+        addToCart(cart1)
+    }
+
     return (
         <div>
-            <button onClick={handleGenerate}>Add Product</button>
+            {/* <button onClick={handleGenerate}>Add Product</button> */}
+            <button onClick={handleClick}>cart</button>
+            {cart && cart[0]?.cost}
         </div>
     )
 }
