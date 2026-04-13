@@ -1,23 +1,17 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
-import { Search, ShoppingCart, User, Plus, CheckCircle2, Printer, ArrowRight, CloudCog } from "lucide-react";
+import { Search, ShoppingCart, User } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Product } from "@/src/types/product";
 import { Customer } from "@/src/types/customer";
-import { SaleItem, SaleStatus, Sale } from "@/src/types/sale";
+import { SaleStatus, Sale } from "@/src/types/sale";
 import { useProducts } from "@/src/context/ProductsContext";
 import { useCustomers } from "@/src/context/CustomersContext";
 import { useSales } from "@/src/context/SalesContext";
 import { useCart } from "@/src/context/CartContext";
-import Button from "@/src/components/Button";
 import ReceiptPrint from "@/src/components/ReceiptPrint";
-import CloseButton from "@/src/components/CloseButton";
 import Summary from "@/src/components/payments/sales/Summary";
 import SuccessModal from "@/src/components/payments/sales/SuccessModal";
-import Select from "@/src/components/common/Select";
-import SearchSelect from "@/src/components/common/SearchSelect";
-import CustomerSearchSelect from "@/src/components/common/SearchSelect";
 import Input from "@/src/components/common/Input";
 
 
@@ -31,7 +25,7 @@ export default function SalesPage() {
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
   const [customerSearch, setCustomerSearch] = useState("");
   const [showCustomerResults, setShowCustomerResults] = useState(false);
-  const { cart, setCart, addToCart, updateQty, updatePrice, removeFromCart, clearCart, cartTotal } = useCart();
+  const { cart, setCart, addToCart, clearCart, cartTotal } = useCart();
   const [isQuotation, setIsQuotation] = useState(false);
   const [paidAmount, setPaidAmount] = useState<string>("0");
   const [isLoading, setIsLoading] = useState(true);
