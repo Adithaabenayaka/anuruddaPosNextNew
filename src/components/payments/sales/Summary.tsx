@@ -1,6 +1,7 @@
 import { SaleItem, SaleStatus } from "@/src/types/sale";
 import { ShoppingCart, Trash2, Plus, Minus, CreditCard, ClipboardList, Wallet, CheckCircle2, FileText, Printer, ArrowRight } from "lucide-react";
 import Button from "@/src/components/Button";
+import CartItemRow from "@/src/common/CartItemRow";
 
 interface SummaryProps {
     cart: SaleItem[];
@@ -67,148 +68,17 @@ const Summary = ({ cart, cartTotal, paidAmount, setPaidAmount, isQuotation, setI
                 {/* Cart Items List */}
                 <div className="flex-1 max-h-[450px] overflow-y-auto">
                     {cart.length > 0 ? (
-                        <div className="divide-y divide-gray-50">
+                        <div className="space-y-3 mt-3">
                             {cart.map((item) => (
-                                <div
+                                <CartItemRow
                                     key={item.id + (item.batchId || "")}
-                                    className="flex flex-col gap-3 p-4 bg-white md:grid md:grid-cols-12 md:items-center md:gap-4 md:px-6 md:py-3 transition-colors hover:bg-gray-50/50"
-                                >
-                                    {/* Product & Remove (Mobile) */}
-                                    <div className="flex justify-between items-start md:col-span-3">
-                                        <div className="flex flex-col min-w-0">
-                                            <span className="font-bold text-gray-900 text-[15px] md:text-sm truncate">
-                                                {item.productName}
-                                            </span>
-                                            <div className="flex flex-wrap gap-2 mt-0.5">
-                                                {item.batchLabel && (
-                                                    <span className="text-[10px] md:text-[9px] bg-primary-50 text-primary-600 font-black uppercase tracking-wider px-1.5 py-0.5 rounded border border-primary-100">
-                                                        {item.batchLabel}
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <button
-                                            onClick={() =>
-                                                removeFromCart(item.id, item.batchId ?? undefined)
-                                            }
-                                            className="md:hidden text-gray-400 hover:text-rose-500 transition-colors p-1"
-                                        >
-                                            <Trash2 size={18} />
-                                        </button>
-                                    </div>
-
-                                    {/* Mobile-only Metadata Grid */}
-                                    <div className="md:hidden grid grid-cols-3 gap-2 py-2 border-y border-gray-50 bg-gray-50/50 px-2.5 rounded-xl text-[10px]">
-                                        <div className="flex flex-col">
-                                            <span className="text-gray-400 font-black uppercase tracking-tighter text-[8px]">Cost</span>
-                                            <span className="font-bold text-gray-600">Rs. {item.cost.toLocaleString()}</span>
-                                        </div>
-                                        <div className="flex flex-col border-x border-gray-100 px-2">
-                                            <span className="text-gray-400 font-black uppercase tracking-tighter text-[8px]">Orig.</span>
-                                            <span className="font-bold text-gray-500">{item.originalPrice ? `Rs. ${item.originalPrice.toLocaleString()}` : '-'}</span>
-                                        </div>
-                                        <div className="flex flex-col pl-1">
-                                            <span className="text-gray-400 font-black uppercase tracking-tighter text-[8px]">Catalog</span>
-                                            <span className="font-bold text-primary-500">{item.catalogPrice ? `Rs. ${item.catalogPrice.toLocaleString()}` : '-'}</span>
-                                        </div>
-                                    </div>
-
-                                    {/* Cost (Desktop) */}
-                                    <div className="hidden md:block md:col-span-1 text-right text-[11px] font-bold text-gray-400">
-                                        Rs. {item.cost.toLocaleString()}
-                                    </div>
-
-                                    {/* Original Price (Desktop) */}
-                                    <div className="hidden md:block md:col-span-1 text-right text-[11px] font-bold text-gray-400">
-                                        {item.originalPrice ? `Rs. ${item.originalPrice.toLocaleString()}` : '-'}
-                                    </div>
-
-                                    {/* Catalog Selling Price (Desktop) */}
-                                    <div className="hidden md:block md:col-span-1 text-right text-[11px] font-bold text-primary-500">
-                                        {item.catalogPrice ? `Rs. ${item.catalogPrice.toLocaleString()}` : '-'}
-                                    </div>
-
-                                    {/* Controls & Prices Container */}
-                                    <div className="flex flex-wrap items-center justify-between gap-4 md:col-span-6 md:grid md:grid-cols-6 md:gap-4">
-                                        {/* Selling Price Input */}
-                                        <div className="w-[120px] md:col-span-2 md:w-auto">
-                                            <label className="md:hidden text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1 block">Manual Price</label>
-                                            <div className="relative">
-                                                <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[10px] md:text-[9px] text-gray-400 font-bold">Rs.</span>
-                                                <input
-                                                    type="number"
-                                                    value={item.price || ''}
-                                                    onChange={(e) =>
-                                                        updatePrice(
-                                                            item.id,
-                                                            e.target.value,
-                                                            item.batchId ?? undefined
-                                                        )
-                                                    }
-                                                    onFocus={(e) => e.target.select()}
-                                                    className={`w-full text-right border rounded-xl md:rounded-lg pl-8 pr-2.5 py-2.5 md:py-1.5 font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none outline-none transition-all text-[15px] md:text-sm ${parseFloat(item.price || "0") <= item.cost
-                                                        ? "border-rose-500 text-rose-600 bg-rose-50 focus:ring-rose-100"
-                                                        : "border-gray-200 text-gray-900 focus:border-primary-300 focus:ring-4 focus:ring-primary-50"
-                                                        }`}
-                                                />
-                                            </div>
-                                        </div>
-
-                                        {/* Qty Control with Buttons */}
-                                        <div className="md:col-span-2 flex flex-col md:items-center">
-                                            <label className="md:hidden text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1 block">Quantity</label>
-                                            <div className="flex items-center gap-1">
-                                                <button
-                                                    onClick={() => updateQty(item.id, Math.max(1, item.qty - 1), item.batchId ?? undefined)}
-                                                    className="w-10 h-10 md:w-8 md:h-8 flex items-center justify-center rounded-xl md:rounded-lg border border-gray-200 text-gray-500 bg-white hover:bg-gray-50 active:scale-95 transition-all shadow-sm"
-                                                >
-                                                    <Minus size={14} />
-                                                </button>
-                                                <input
-                                                    type="number"
-                                                    min={1}
-                                                    value={item.qty}
-                                                    onChange={(e) =>
-                                                        updateQty(
-                                                            item.id,
-                                                            Number(e.target.value),
-                                                            item.batchId ?? undefined
-                                                        )
-                                                    }
-                                                    className="w-14 md:w-10 text-center border-0 font-black text-primary-600 focus:outline-none bg-transparent text-xl md:text-sm"
-                                                    onFocus={(e) => e.target.select()}
-                                                />
-                                                <button
-                                                    onClick={() => updateQty(item.id, item.qty + 1, item.batchId ?? undefined)}
-                                                    className="w-10 h-10 md:w-8 md:h-8 flex items-center justify-center rounded-xl md:rounded-lg border border-gray-200 text-gray-500 bg-white hover:bg-gray-50 active:scale-95 transition-all shadow-sm"
-                                                >
-                                                    <Plus size={14} />
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        {/* Total */}
-                                        <div className="md:col-span-1 text-right flex flex-col md:items-end">
-                                            <label className="md:hidden text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1 block">Subtotal</label>
-                                            <span className="font-black text-gray-900 text-lg md:text-sm">
-                                                Rs. {(parseFloat(item.price || "0") * item.qty).toLocaleString()}
-                                            </span>
-                                        </div>
-
-                                        {/* Remove (Desktop) */}
-                                        <div className="hidden md:flex md:col-span-1 justify-end">
-                                            <button
-                                                onClick={() =>
-                                                    removeFromCart(item.id, item.batchId ?? undefined)
-                                                }
-                                                className="text-gray-300 hover:text-rose-500 hover:bg-rose-50 p-2 rounded-lg transition-all"
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
+                                    item={item}
+                                    updateQty={updateQty}
+                                    updatePrice={updatePrice}
+                                    removeFromCart={removeFromCart}
+                                />
                             ))}
+
                         </div>
                     ) : (
                         <div className="py-20 text-center flex flex-col items-center gap-3">
