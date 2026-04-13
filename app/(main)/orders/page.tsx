@@ -277,9 +277,22 @@ export default function OrdersPage() {
         }
     ], []);
 
+    useEffect(() => {
+        console.log("=== SALES DEBUG ===");
+        sales.forEach(s => {
+            console.log({
+                id: s.id,
+                status: s.status,
+                paidAmount: s.paidAmount
+            });
+        });
+    }, [sales]);
+
     const totalRevenue = useMemo(() =>
-        sales.filter(s => s.status !== 'quotation').reduce((acc, curr) => acc + (curr.paidAmount || 0), 0)
-        , [sales]);
+        sales
+            .filter(s => s.status !== 'quotation')
+            .reduce((acc, curr) => acc + (Number(curr.paidAmount) || 0), 0),
+        [sales]);
 
     const totalQuotations = useMemo(() =>
         sales.filter(s => s.status === 'quotation').reduce((acc, curr) => acc + curr.total, 0)
@@ -341,68 +354,89 @@ export default function OrdersPage() {
                     pageSize={10}
                 />
 
-                <footer className="mt-8 flex flex-col lg:flex-row justify-between items-center gap-6 bg-primary-900 text-white p-6 rounded-2xl shadow-xl shadow-primary-200/50">
-                    <div className="flex flex-wrap gap-10 items-center justify-center lg:justify-start">
+                <footer className="mt-8 bg-primary-900 text-white p-4 md:p-6 rounded-2xl shadow-xl shadow-primary-200/50">
+
+                    {/* Top Stats */}
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:flex lg:flex-wrap gap-4 lg:gap-10">
+
                         <div>
-                            <p className="text-primary-300 text-[10px] font-bold uppercase tracking-widest mb-1">Total Received</p>
-                            <p className="text-xl font-black">
+                            <p className="text-primary-300 text-[10px] font-bold uppercase tracking-widest mb-1">
+                                Total Received
+                            </p>
+                            <p className="text-lg md:text-xl font-black">
                                 Rs. {totalRevenue.toLocaleString()}
                             </p>
                         </div>
-                        <div className="border-l border-primary-800/50 pl-10">
-                            <p className="text-primary-300 text-[10px] font-bold uppercase tracking-widest mb-1">TOTAL DUE</p>
-                            <p className="text-xl font-black text-primary-400">
+
+                        <div className="sm:border-l sm:pl-6 border-primary-800/50">
+                            <p className="text-primary-300 text-[10px] font-bold uppercase tracking-widest mb-1">
+                                Total Due
+                            </p>
+                            <p className="text-lg md:text-xl font-black text-primary-400">
                                 Rs. {totalDue.toLocaleString()}
                             </p>
                         </div>
-                        <div className="border-l border-primary-800/50 pl-10">
-                            <p className="text-primary-300 text-[10px] font-bold uppercase tracking-widest mb-1">TOTAL PROFIT</p>
-                            <p className="text-xl font-black text-primary-400">
+
+                        <div className="sm:border-l sm:pl-6 border-primary-800/50">
+                            <p className="text-primary-300 text-[10px] font-bold uppercase tracking-widest mb-1">
+                                Total Profit
+                            </p>
+                            <p className="text-lg md:text-xl font-black text-primary-400">
                                 Rs. {totalProfit.toLocaleString()}
                             </p>
                         </div>
-                        {/* <div className="border-l border-primary-800/50 pl-10">
-                            <p className="text-primary-300 text-[10px] font-bold uppercase tracking-widest mb-1">In Quotations</p>
-                            <p className="text-xl font-black text-primary-400">
-                                Rs. {totalQuotations.toLocaleString()}
+
+                    </div>
+
+                    {/* Aging Buttons */}
+                    <div className="mt-4 flex flex-col sm:flex-row gap-3">
+
+                        <button
+                            onClick={() => {
+                                setAgingFilter(agingFilter === '14-21' ? 'all' : '14-21');
+                                setStatusFilter('all');
+                            }}
+                            className={`w-full sm:w-auto flex flex-col items-start p-3 rounded-xl border transition-all ${agingFilter === '14-21'
+                                ? 'bg-amber-400/20 border-amber-400 text-amber-400'
+                                : 'bg-primary-800/30 border-primary-800/50 text-primary-300'
+                                }`}
+                        >
+                            <span className="text-[9px] font-black uppercase tracking-wider opacity-60">
+                                14-21 Days Late
+                            </span>
+                            <p className="text-sm font-black">
+                                Rs. {agingStats.fourteenToTwentyOne.totalBalance.toLocaleString()}
                             </p>
-                        </div> */}
+                        </button>
 
-                        {/* Aging Quick Filters */}
-                        <div className="flex items-center gap-3 border-l border-primary-800/50 pl-10">
-                            <button
-                                onClick={() => {
-                                    setAgingFilter(agingFilter === '14-21' ? 'all' : '14-21');
-                                    setStatusFilter('all');
-                                }}
-                                className={`flex flex-col items-start gap-0.5 p-2 px-4 rounded-xl transition-all border ${agingFilter === '14-21'
-                                    ? 'bg-amber-400/20 border-amber-400 text-amber-400 ring-2 ring-amber-400/20 shadow-[0_0_15px_-3px_rgba(251,191,36,0.3)]'
-                                    : 'bg-primary-800/30 border-primary-800/50 text-primary-300 hover:bg-primary-800/50 hover:border-amber-400/50'
-                                    }`}
-                            >
-                                <span className="text-[9px] font-black uppercase tracking-wider opacity-60">14-21 Days Late</span>
-                                <p className="text-sm font-black whitespace-nowrap">Rs. {agingStats.fourteenToTwentyOne.totalBalance.toLocaleString()}</p>
-                            </button>
+                        <button
+                            onClick={() => {
+                                setAgingFilter(agingFilter === '21+' ? 'all' : '21+');
+                                setStatusFilter('all');
+                            }}
+                            className={`w-full sm:w-auto flex flex-col items-start p-3 rounded-xl border transition-all ${agingFilter === '21+'
+                                ? 'bg-rose-400/20 border-rose-400 text-rose-400'
+                                : 'bg-primary-800/30 border-primary-800/50 text-primary-300'
+                                }`}
+                        >
+                            <span className="text-[9px] font-black uppercase tracking-wider opacity-60">
+                                21+ Days Late
+                            </span>
+                            <p className="text-sm font-black">
+                                Rs. {agingStats.overTwentyOne.totalBalance.toLocaleString()}
+                            </p>
+                        </button>
 
-                            <button
-                                onClick={() => {
-                                    setAgingFilter(agingFilter === '21+' ? 'all' : '21+');
-                                    setStatusFilter('all');
-                                }}
-                                className={`flex flex-col items-start gap-0.5 p-2 px-4 rounded-xl transition-all border ${agingFilter === '21+'
-                                    ? 'bg-rose-400/20 border-rose-400 text-rose-400 ring-2 ring-rose-400/20 shadow-[0_0_15px_-3px_rgba(244,63,94,0.3)]'
-                                    : 'bg-primary-800/30 border-primary-800/50 text-primary-300 hover:bg-primary-800/50 hover:border-rose-400/50'
-                                    }`}
-                            >
-                                <span className="text-[9px] font-black uppercase tracking-wider opacity-60">21+ Days Late</span>
-                                <p className="text-sm font-black whitespace-nowrap">Rs. {agingStats.overTwentyOne.totalBalance.toLocaleString()}</p>
-                            </button>
-                        </div>
                     </div>
-                    <div className="text-right border-t lg:border-t-0 lg:border-l border-primary-800/50 pt-4 lg:pt-0 lg:pl-10 w-full lg:w-auto">
-                        <p className="text-primary-300 text-[10px] font-bold uppercase tracking-widest mb-1">Total Records</p>
-                        <p className="text-xl font-black">{sales.length}</p>
+
+                    {/* Bottom Right */}
+                    <div className="mt-4 pt-4 border-t border-primary-800/50 text-center sm:text-right">
+                        <p className="text-primary-300 text-[10px] font-bold uppercase tracking-widest mb-1">
+                            Total Records
+                        </p>
+                        <p className="text-lg md:text-xl font-black">{sales.length}</p>
                     </div>
+
                 </footer>
 
                 {/* Sale Details Modal */}

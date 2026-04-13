@@ -343,7 +343,7 @@ export default function SalesPage() {
           <div className="w-full flex flex-col md:flex-row gap-6">
 
             {/* Buyer Info */}
-            <section className="bg-white w-full md:w-[40%] relative z-30">
+            <section className="bg-white w-full md:w-[40%] relative z-40">
               <label className="text-[13px] font-bold text-gray-500 block mb-2 flex items-center justify-between gap-2 tracking-wider">
                 <div className="flex items-center gap-2">
                   <User size={14} className="text-primary-500 " />
@@ -375,7 +375,9 @@ export default function SalesPage() {
                   onFocus={() => setShowCustomerResults(true)}></Input>
 
                 {showCustomerResults && filteredCustomers.length > 0 && (
-                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-100 rounded-xl shadow-xl z-50 max-h-60 overflow-y-auto overflow-x-hidden p-1">
+                  <div className="absolute top-full left-0 right-0 mt-1 z-50 
+                    bg-white border border-gray-200 rounded-xl shadow-xl 
+                    max-h-80 overflow-y-auto p-2">
                     {filteredCustomers.map(customer => (
                       <div
                         key={customer.id}
