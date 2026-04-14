@@ -72,8 +72,8 @@ export default function SalesPage() {
         if (sale && sale.status === 'draft') {
           setBuyerName(sale.buyerName);
           setCustomerSearch(sale.buyerName);
-          setAddress1(sale.buyerName || "");
-          setAddress2(sale.buyerName || "");
+          setAddress1(sale.buyerAddressLine1 || "");
+          setAddress2(sale.buyerAddressLine2 || "");
           setSelectedCustomerId(sale.customerId || null);
           setCart(sale.items);
           setPaidAmount(sale.paidAmount?.toString() || "0");
@@ -130,6 +130,8 @@ export default function SalesPage() {
   const selectCustomer = (customer: Customer) => {
     setBuyerName(customer.customerName);
     setSelectedCustomerId(customer.id || null);
+    setAddress1(customer.addressLine1 || "");
+    setAddress2(customer.addressLine2 || "");
     setCustomerSearch(customer.customerName);
     setShowCustomerResults(false);
   };
@@ -154,6 +156,8 @@ export default function SalesPage() {
       setIsProcessing(true);
       const saleData: any = {
         buyerName,
+        buyerAddressLine1: address1,
+        buyerAddressLine2: address2,
         customerId: selectedCustomerId || null,
         items: cart,
         total: cartTotal,
@@ -185,6 +189,8 @@ export default function SalesPage() {
       setSearchTerm("");
       setPaidAmount("0");
       setIsQuotation(false);
+      setAddress1("");
+      setAddress2("");
     } catch (error: any) {
       console.error("Sale processing failed:", error);
       alert(error.message || "Failed to process sale. Try again.");
@@ -213,6 +219,8 @@ export default function SalesPage() {
       setIsProcessing(true);
       const saleData: any = {
         buyerName,
+        buyerAddressLine1: address1,
+        buyerAddressLine2: address2,
         customerId: selectedCustomerId || null,
         items: cart,
         total: cartTotal,
@@ -238,6 +246,8 @@ export default function SalesPage() {
       setSearchTerm("");
       setPaidAmount("0");
       setIsQuotation(false);
+      setAddress1("");
+      setAddress2("");
     } catch (error: any) {
       console.error("Draft saving failed:", error);
       alert(error.message || "Failed to save draft. Try again.");

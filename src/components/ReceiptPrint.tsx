@@ -105,7 +105,8 @@ const ReceiptPrint = ({ sale }: ReceiptPrintProps) => {
                     <div className="w-32">
                         <p className="text-gray-500 font-semibold">BILL TO</p>
                         <p className="font-semibold mt-1">{sale.buyerName}</p>
-                        <p className="font-semibold">1/79 Raigama, Bandaragama,sdfsdf</p>
+                        {sale.buyerAddressLine1 && <p className="font-semibold">{sale.buyerAddressLine1}</p>}
+                        {sale.buyerAddressLine2 && <p className="font-semibold">{sale.buyerAddressLine2}</p>}
 
                     </div>
                     <div className="flex flex-col items-end">

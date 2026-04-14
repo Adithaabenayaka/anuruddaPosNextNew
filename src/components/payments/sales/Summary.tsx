@@ -29,6 +29,15 @@ const Summary = ({ paidAmount, setPaidAmount, isQuotation, setIsQuotation, handl
         clearCart();
     }
 
+    const totalDiscount = cart.reduce((acc, item) => {
+        const price = parseFloat(item.price);
+        const originalPrice = item.originalPrice || price;
+        const discount = originalPrice > price ? (originalPrice - price) * item.qty : 0;
+        return acc + discount;
+    }, 0);
+
+    const subtotal = cartTotal + totalDiscount;
+
     const invoiceData: InvoiceData = {
         customer: {
             name: buyerName,
@@ -36,11 +45,11 @@ const Summary = ({ paidAmount, setPaidAmount, isQuotation, setIsQuotation, handl
             address2: address2
         },
         items: cart,
-        subtotal: 0,
-        discount: 0,
-        total: 0,
-        paid: 0,
-        balance: 0
+        subtotal: subtotal,
+        discount: totalDiscount,
+        total: cartTotal,
+        paid: parseFloat(paidAmount) || 0,
+        balance: balanceAmount
     }
 
     return (

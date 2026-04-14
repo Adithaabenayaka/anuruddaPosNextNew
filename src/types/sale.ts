@@ -26,6 +26,8 @@ export interface Sale {
     id?: string;
     customerId?: string | null; // Link to registered customer
     buyerName: string;
+    buyerAddressLine1?: string;
+    buyerAddressLine2?: string;
     items: SaleItem[];
     total: number;
     paidAmount?: number; // How much was actually paid
