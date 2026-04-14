@@ -1,14 +1,19 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
-type InvoiceItem = {
-    name: string;
+
+export interface SaleItem {
+    id: string;
+    productId: string;
+    productName: string;
+    price: string; // string → will convert
+    originalPrice?: number | null;
+    catalogPrice?: number | null;
+    cost: number;
     qty: number;
-    mrp: number;
-    rate: number;
-    discount: number;
-    amount: number;
-};
+    batchId?: string | null;
+    batchLabel?: string | null;
+}
 
 export type InvoiceData = {
     customer: {
@@ -16,7 +21,7 @@ export type InvoiceData = {
         address1: string;
         address2: string;
     };
-    items: InvoiceItem[];
+    items: SaleItem[];
     subtotal: number;
     discount: number;
     total: number;
@@ -24,6 +29,17 @@ export type InvoiceData = {
     balance: number;
 };
 
+// =========================
+// HELPER
+// =========================
+const toNumber = (value: string | number | undefined | null) => {
+    if (!value) return 0;
+    return typeof value === "string" ? parseFloat(value) : value;
+};
+
+// =========================
+// MAIN FUNCTION
+// =========================
 export const generateInvoicePDF = (data: InvoiceData) => {
     const doc = new jsPDF();
 
@@ -65,14 +81,25 @@ export const generateInvoicePDF = (data: InvoiceData) => {
     // =========================
     // TABLE DATA
     // =========================
-    const tableBody = data.items.map(item => [
-        item.name,
-        item.qty.toString(),
-        item.mrp.toFixed(2),
-        item.rate.toFixed(2),
-        item.discount.toFixed(2),
-        item.amount.toFixed(2),
-    ]);
+    const tableBody = data.items.map((item) => {
+        const price = toNumber(item.price);
+        const qty = item.qty;
+        const amount = price * qty;
+
+        const discount =
+            item.originalPrice && item.originalPrice > price
+                ? (item.originalPrice - price) * qty
+                : 0;
+
+        return [
+            item.productName,
+            qty.toString(),
+            item.originalPrice?.toFixed(2) || price.toFixed(2), // MRP
+            price.toFixed(2), // Rate
+            discount.toFixed(2),
+            amount.toFixed(2),
+        ];
+    });
 
     // TOTAL ROW
     tableBody.push([

@@ -11,7 +11,8 @@ const INITIAL_FORM_DATA: CreateCustomerInput = {
   customerName: "",
   phone: "",
   email: "",
-  address: "",
+  addressLine1: "",
+  addressLine2: "",
   loyaltyPoints: 0,
 };
 
@@ -41,7 +42,8 @@ export default function CustomersPage() {
         customerName: customer.customerName,
         phone: customer.phone,
         email: customer.email || "",
-        address: customer.address || "",
+        addressLine1: customer.addressLine1 || "",
+        addressLine2: customer.addressLine2 || "",
         loyaltyPoints: customer.loyaltyPoints || 0,
       });
       setEditingId(customer.id || null);
@@ -264,16 +266,27 @@ export default function CustomersPage() {
                 />
               </div>
 
-              <div>
-                <label className="text-[11px] font-bold text-gray-500 block mb-1 uppercase tracking-wider">Residential Address</label>
-                <textarea
-                  name="address"
-                  rows={2}
-                  value={formData.address}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 bg-gray-50 border border-gray-100 rounded-xl focus:bg-white focus:ring-4 focus:ring-primary-100 focus:border-primary-400 outline-none transition-all resize-none"
-                  placeholder="Apartment, Street, City..."
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-[11px] font-bold text-gray-500 block mb-1 uppercase tracking-wider">Address Line 1</label>
+                  <input
+                    name="addressLine1"
+                    value={formData.addressLine1}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-100 rounded-xl focus:bg-white focus:ring-4 focus:ring-primary-100 focus:border-primary-400 outline-none transition-all"
+                    placeholder="e.g. 123 Main St"
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] font-bold text-gray-500 block mb-1 uppercase tracking-wider">Address Line 2</label>
+                  <input
+                    name="addressLine2"
+                    value={formData.addressLine2}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-100 rounded-xl focus:bg-white focus:ring-4 focus:ring-primary-100 focus:border-primary-400 outline-none transition-all"
+                    placeholder="e.g. Apartment, Suite"
+                  />
+                </div>
               </div>
 
               <footer className="pt-4 flex gap-3">

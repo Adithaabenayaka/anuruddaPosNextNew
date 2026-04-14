@@ -35,6 +35,8 @@ export default function SalesPage() {
   const searchParams = useSearchParams();
   const resumedSaleId = searchParams.get("resume");
   const { getSaleById, updateSale } = useSales();
+  const [address1, setAddress1] = useState("");
+  const [address2, setAddress2] = useState("");
   const [showProductResults, setShowProductResults] = useState(false);
   const productRef = useRef<HTMLDivElement | null>(null);
 
@@ -70,6 +72,8 @@ export default function SalesPage() {
         if (sale && sale.status === 'draft') {
           setBuyerName(sale.buyerName);
           setCustomerSearch(sale.buyerName);
+          setAddress1(sale.buyerName || "");
+          setAddress2(sale.buyerName || "");
           setSelectedCustomerId(sale.customerId || null);
           setCart(sale.items);
           setPaidAmount(sale.paidAmount?.toString() || "0");
@@ -423,6 +427,9 @@ export default function SalesPage() {
           <Summary
             paidAmount={paidAmount}
             setPaidAmount={setPaidAmount}
+            buyerName={buyerName}
+            address1={address1}
+            address2={address2}
             isQuotation={isQuotation}
             setIsQuotation={setIsQuotation}
             handleCheckout={handleCheckout}

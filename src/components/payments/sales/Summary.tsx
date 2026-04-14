@@ -3,6 +3,7 @@ import { ShoppingCart, Trash2, CreditCard, ClipboardList, Wallet, FileText, Wall
 import Button from "@/src/components/Button";
 import CartItemRow from "@/src/common/CartItemRow";
 import { useCart } from "@/src/context/CartContext";
+import { generateInvoicePDF, InvoiceData } from "@/src/services/pdfService";
 
 interface SummaryProps {
     paidAmount: string;
@@ -14,14 +15,32 @@ interface SummaryProps {
     isProcessing: boolean;
     derivedStatus: SaleStatus;
     balanceAmount: number;
+    buyerName: string;
+    address1: string;
+    address2: string;
 }
 
 
-const Summary = ({ paidAmount, setPaidAmount, isQuotation, setIsQuotation, handleCheckout, handleSaveDraft, isProcessing, derivedStatus, balanceAmount }: SummaryProps) => {
-    const { cart, cartTotal, clearCart, updateQty, updatePrice, removeFromCart } = useCart();
+const Summary = ({ paidAmount, setPaidAmount, isQuotation, setIsQuotation, handleCheckout, handleSaveDraft, isProcessing, derivedStatus, balanceAmount, buyerName, address1, address2 }: SummaryProps) => {
+    const { cart, cartTotal, clearCart, removeFromCart } = useCart();
+
 
     const handleCleanCart = () => {
         clearCart();
+    }
+
+    const invoiceData: InvoiceData = {
+        customer: {
+            name: buyerName,
+            address1: address1,
+            address2: address2
+        },
+        items: cart,
+        subtotal: 0,
+        discount: 0,
+        total: 0,
+        paid: 0,
+        balance: 0
     }
 
     return (
@@ -142,7 +161,17 @@ const Summary = ({ paidAmount, setPaidAmount, isQuotation, setIsQuotation, handl
                         )}
                     </div>
 
-                    <div className={`flex grid ${isQuotation ? 'grid-cols-1' : 'grid-cols-2'} gap-2 mb-3`}>
+                    <div className={`flex grid ${isQuotation ? 'grid-cols-1' : 'grid-cols-3'} gap-2 mb-3`}>
+                        <Button
+                            variant="primary"
+                            className="!bg-gray-100 text-gray-600 hover:!bg-gray-200 !rounded-xl h-11 !shadow-none !text-[10px] !font-black uppercase tracking-wider px-4"
+                            onClick={() => generateInvoicePDF(invoiceData)}
+                            isLoading={isProcessing}
+                            title="Generate PDF"
+                        >
+                            <FileText size={16} color="white" />
+                            PDF
+                        </Button>
                         {!isQuotation && (
                             <Button
                                 variant="primary"
@@ -152,7 +181,7 @@ const Summary = ({ paidAmount, setPaidAmount, isQuotation, setIsQuotation, handl
                                 title="Save as Draft"
                             >
                                 <FileText size={16} color="white" />
-                                Save as Draft
+                                Draft
                             </Button>
                         )}
                         <Button
@@ -163,8 +192,7 @@ const Summary = ({ paidAmount, setPaidAmount, isQuotation, setIsQuotation, handl
                             title="Clean Cart"
                         >
                             <Trash2 size={16} color="white" />
-                            Clean Cart
-                        </Button>
+                            Clean                        </Button>
                     </div>
 
                     <div className={`flex gap-2 mb-3`}>

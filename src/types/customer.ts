@@ -4,6 +4,8 @@ export interface Customer {
     phone: string;
     email?: string;
     address?: string;
+    addressLine1?: string;
+    addressLine2?: string;
     loyaltyPoints?: number;
     createdAt?: string;
     updatedAt?: string;
