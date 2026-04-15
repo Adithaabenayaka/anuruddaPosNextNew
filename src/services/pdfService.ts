@@ -37,11 +37,33 @@ const toNumber = (value: string | number | undefined | null) => {
     return typeof value === "string" ? parseFloat(value) : value;
 };
 
+export const formatMoney = (amount: number) => {
+    return amount.toLocaleString("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    });
+};
+
+
 // =========================
 // MAIN FUNCTION
 // =========================
 export const generateInvoicePDF = (data: InvoiceData) => {
     const doc = new jsPDF();
+
+    console.log(data)
+
+    const totalDiscount = data.items.reduce((acc, item) => {
+        const price = toNumber(item.price);
+        const discount =
+            item.originalPrice && item.originalPrice > price
+                ? (item.originalPrice - price) * item.qty
+                : 0;
+        return acc + discount;
+    }, 0);
+
+    console.log(totalDiscount)
+
 
     // =========================
     // HEADER
@@ -94,10 +116,10 @@ export const generateInvoicePDF = (data: InvoiceData) => {
         return [
             item.productName,
             qty.toString(),
-            item.originalPrice?.toFixed(2) || price.toFixed(2), // MRP
-            price.toFixed(2), // Rate
-            discount.toFixed(2),
-            amount.toFixed(2),
+            (formatMoney(Number(item.originalPrice?.toFixed(2))) || formatMoney(Number(price.toFixed(2)))), // MRP
+            formatMoney(Number(price.toFixed(2))), // Rate
+            formatMoney(Number(discount.toFixed(2))),
+            formatMoney(Number(amount.toFixed(2))),
         ];
     });
 
@@ -107,8 +129,8 @@ export const generateInvoicePDF = (data: InvoiceData) => {
         "",
         "",
         "",
-        data.discount.toFixed(2),
-        data.total.toFixed(2),
+        formatMoney(Number(data.discount.toFixed(2))),
+        formatMoney(Number(data.total.toFixed(2))),
     ]);
 
     autoTable(doc, {
@@ -147,27 +169,44 @@ export const generateInvoicePDF = (data: InvoiceData) => {
     doc.setFont("helvetica", "normal");
 
     doc.text("Subtotal", 140, finalY + 10);
-    doc.text(data.subtotal.toFixed(2), 190, finalY + 10, { align: "right" });
+    doc.text(formatMoney(Number(data.subtotal.toFixed(2))), 190, finalY + 10, { align: "right" });
 
     doc.text("Discount", 140, finalY + 16);
-    doc.text(`- ${data.discount.toFixed(2)}`, 190, finalY + 16, { align: "right" });
+    doc.text(`- ${formatMoney(Number(data.discount.toFixed(2)))}`, 190, finalY + 16, { align: "right" });
 
     doc.setFont("helvetica", "bold");
     doc.text("Total", 140, finalY + 24);
-    doc.text(data.total.toFixed(2), 190, finalY + 24, { align: "right" });
+    doc.text(formatMoney(Number(data.total.toFixed(2))), 190, finalY + 24, { align: "right" });
 
     doc.setFont("helvetica", "normal");
     doc.text("Paid", 140, finalY + 30);
-    doc.text(data.paid.toFixed(2), 190, finalY + 30, { align: "right" });
+    doc.text(formatMoney(Number(data.paid.toFixed(2))), 190, finalY + 30, { align: "right" });
 
     doc.text("Balance", 140, finalY + 36);
-    doc.text(data.balance.toFixed(2), 190, finalY + 36, { align: "right" });
+    doc.text(formatMoney(Number(data.balance.toFixed(2))), 190, finalY + 36, { align: "right" });
+
+    // Bank Details
+    doc.setFont("helvetica", "bold");
+    doc.text("Bank Details", 20, finalY + 10);
+
+    doc.setFont("helvetica", "normal");
+    doc.text("HD Pemarathna", 20, finalY + 16);
+    doc.text("93563181", 20, finalY + 22);
+    doc.text("Bank of Ceylon - Horana", 20, finalY + 28);
+
+    // Terms and Conditions
+    doc.setFont("helvetica", "bold");
+    doc.text("TERMS", 20, finalY + 42);
+
+    doc.setFont("helvetica", "normal");
+    doc.text("INVOICE REQUIRED FOR WARRANTY CLAIMS", 20, finalY + 48);
+
 
     // =========================
     // SAVINGS TEXT
     // =========================
     doc.setTextColor(0, 128, 0);
-    doc.text(`You saved ${data.discount.toFixed(2)}`, 140, finalY + 46);
+    doc.text(`You saved ${formatMoney(Number(data.discount.toFixed(2)))}`, 140, finalY + 46);
     doc.setTextColor(0, 0, 0);
 
     // =========================

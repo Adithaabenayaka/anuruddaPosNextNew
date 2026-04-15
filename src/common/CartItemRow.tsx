@@ -76,7 +76,7 @@ export default function CartItemRow({
                             onChange={(e) =>
                                 updatePrice(item.id, e.target.value, item.batchId ?? undefined)
                             }
-                            className={`w-full text-right border rounded-xl md:rounded-lg pl-8 pr-2 py-2 font-bold ${parseFloat(item.price || "0") <= item.cost
+                            className={`w-full text-right border rounded-xl md:rounded-lg pl-8 pr-2 py-2 font-bold ${parseFloat(item.price || "0") <= item.cost - 1
                                 ? "border-rose-500 text-rose-600 bg-rose-50"
                                 : "border-gray-200"
                                 }`}
