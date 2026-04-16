@@ -73,6 +73,7 @@ export const generateInvoicePDF = (data: InvoiceData) => {
         // =========================
         // HEADER
         // =========================
+
         doc.setFontSize(16);
         doc.setFont("helvetica", "bold");
         doc.text("APEX OFFICE SOLUTIONS", 54, 20);
@@ -83,7 +84,7 @@ export const generateInvoicePDF = (data: InvoiceData) => {
         doc.text("Phone 038 22 91 581", 54, 31);
         doc.text("Mobile 070 62 62 434", 54, 36);
 
-        doc.text(new Date().toLocaleDateString(), 170, 20);
+        doc.text(new Date().toLocaleDateString(), 170, 55);
 
         doc.line(20, 42, 190, 42);
 
@@ -148,19 +149,34 @@ export const generateInvoicePDF = (data: InvoiceData) => {
             margin: { left: 20, right: 20 },
             head: [["ITEM", "QTY", "MRP", "RATE", "DISCOUNT", "AMOUNT"]],
             body: tableBody,
-            theme: "striped",
+            theme: "plain",
 
             styles: {
                 fontSize: 10,
                 cellPadding: 2,
+                lineWidth: 0,
+                halign: "center",
             },
 
             columnStyles: {
-                1: { halign: "right" },
-                2: { halign: "right" },
-                3: { halign: "right" },
-                4: { halign: "right" },
-                5: { halign: "right" },
+                0: { halign: "left" },   // ITEM 👈
+                5: { halign: "right" },  // AMOUNT 👈
+            },
+
+
+
+            didDrawCell: (data) => {
+                const { doc, cell } = data;
+
+                // Draw only bottom border (horizontal line)
+                doc.setDrawColor(200); // light gray
+                doc.setLineWidth(0.2);
+                doc.line(
+                    cell.x,
+                    cell.y + cell.height,
+                    cell.x + cell.width,
+                    cell.y + cell.height
+                );
             },
 
             didParseCell: (hookData) => {
@@ -178,46 +194,50 @@ export const generateInvoicePDF = (data: InvoiceData) => {
         // =========================
         doc.setFont("helvetica", "normal");
 
-        doc.text("Subtotal", 140, finalY + 10);
-        doc.text(formatMoney(Number(data.subtotal.toFixed(2))), 190, finalY + 10, { align: "right" });
+        // doc.text("Subtotal", 140, finalY + 10);
+        // doc.text(formatMoney(Number(data.subtotal.toFixed(2))), 190, finalY + 10, { align: "right" });
 
-        doc.text("Discount", 140, finalY + 16);
-        doc.text(`- ${formatMoney(Number(data.discount.toFixed(2)))}`, 190, finalY + 16, { align: "right" });
+        // doc.text("Discount", 140, finalY + 16);
+        // doc.text(`- ${formatMoney(Number(data.discount.toFixed(2)))}`, 190, finalY + 16, { align: "right" });
 
         doc.setFont("helvetica", "bold");
-        doc.text("Total", 140, finalY + 24);
-        doc.text(formatMoney(Number(data.total.toFixed(2))), 190, finalY + 24, { align: "right" });
+        doc.text("Total", 140, finalY + 10);
+        doc.text(formatMoney(Number(data.total.toFixed(2))), 190, finalY + 10, { align: "right" });
 
-        doc.setFont("helvetica", "normal");
-        doc.text("Paid", 140, finalY + 30);
-        doc.text(formatMoney(Number(data.paid.toFixed(2))), 190, finalY + 30, { align: "right" });
-
-        doc.text("Balance", 140, finalY + 36);
-        doc.text(formatMoney(Number(data.balance.toFixed(2))), 190, finalY + 36, { align: "right" });
 
         // Bank Details
         if (!data.isQuatation) {
+            doc.setFont("helvetica", "normal");
+            doc.text("Paid", 140, finalY + 16);
+            doc.text(formatMoney(Number(data.paid.toFixed(2))), 190, finalY + 16, { align: "right" });
+
+            doc.text("Balance", 140, finalY + 22);
+            doc.text(formatMoney(Number(data.balance.toFixed(2))), 190, finalY + 22, { align: "right" });
+
+
             doc.setFont("helvetica", "bold");
-            doc.text("Bank Details", 20, finalY + 10);
+            doc.text("Bank Details", 20, finalY + 30 + 10);
 
             doc.setFont("helvetica", "normal");
-            doc.text("HD Pemarathna", 20, finalY + 16);
-            doc.text("93563181", 20, finalY + 22);
-            doc.text("Bank of Ceylon - Horana", 20, finalY + 28);
+            doc.text("HD Pemarathna", 20, finalY + 30 + 16);
+            doc.text("93563181", 20, finalY + 30 + 22);
+            doc.text("Bank of Ceylon - Horana", 20, finalY + 30 + 28);
 
             // Terms and Conditions
             doc.setFont("helvetica", "bold");
-            doc.text("TERMS", 20, finalY + 42);
+            doc.setFontSize(10)
+            doc.setTextColor(117, 117, 117);
+            doc.text("TERMS", 20, finalY + 30 + 42);
 
             doc.setFont("helvetica", "normal");
-            doc.text("INVOICE REQUIRED FOR WARRANTY CLAIMS", 20, finalY + 48);
+            doc.text("INVOICE REQUIRED FOR WARRANTY CLAIMS", 20, finalY + 30 + 48);
 
 
             // =========================
             // SAVINGS TEXT
             // =========================
             doc.setTextColor(0, 128, 0);
-            doc.text(`You saved ${formatMoney(Number(data.discount.toFixed(2)))}`, 140, finalY + 46);
+            doc.text(`You saved ${formatMoney(Number(data.discount.toFixed(2)))}`, 140, finalY + 34);
             doc.setTextColor(0, 0, 0);
 
         }
