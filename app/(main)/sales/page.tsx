@@ -13,6 +13,7 @@ import ReceiptPrint from "@/src/components/ReceiptPrint";
 import Summary from "@/src/components/payments/sales/Summary";
 import SuccessModal from "@/src/components/payments/sales/SuccessModal";
 import Input from "@/src/components/common/Input";
+import { generateInvoicePDF, InvoiceData } from "@/src/services/pdfService";
 
 
 export default function SalesPage() {
@@ -30,7 +31,7 @@ export default function SalesPage() {
   const [paidAmount, setPaidAmount] = useState<string>("0");
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  // const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [lastProcessedSale, setLastProcessedSale] = useState<Sale | null>(null);
   const searchParams = useSearchParams();
   const resumedSaleId = searchParams.get("resume");
@@ -166,6 +167,29 @@ export default function SalesPage() {
         status: derivedStatus,
       };
 
+      const totalDiscount = cart.reduce((acc, item) => {
+        const price = parseFloat(item.price);
+        const originalPrice = item.originalPrice || price;
+        const discount = originalPrice > price ? (originalPrice - price) * item.qty : 0;
+        return acc + discount;
+      }, 0);
+
+
+      const invoiveData: InvoiceData = {
+        customer: {
+          name: buyerName,
+          address1: address1,
+          address2: address2
+        },
+        items: cart,
+        subtotal: cartTotal,
+        discount: totalDiscount,
+        total: cartTotal - totalDiscount,
+        paid: isQuotation ? 0 : parseFloat(paidAmount || "0"),
+        balance: isQuotation ? cartTotal : balanceAmount
+      }
+      generateInvoicePDF(invoiveData);
+
       let processedSale;
       if (resumedSaleId) {
         processedSale = await updateSale(resumedSaleId, saleData);
@@ -179,7 +203,7 @@ export default function SalesPage() {
 
       // Setup Success Modal
       setLastProcessedSale(processedSale);
-      setShowSuccessModal(true);
+      // setShowSuccessModal(true);
 
       // Cleanup Cart UI
       clearCart();
@@ -466,20 +490,20 @@ export default function SalesPage() {
       </div>
 
       {/* Success Modal */}
-      {showSuccessModal && lastProcessedSale && (
+      {/* {showSuccessModal && lastProcessedSale && (
         <SuccessModal
           lastProcessedSale={lastProcessedSale}
           setShowSuccessModal={setShowSuccessModal}
           setLastProcessedSale={setLastProcessedSale}
         />
-      )}
+      )} */}
 
       {/* PDF & Print Container */}
-      {lastProcessedSale && (
+      {/* {lastProcessedSale && (
         <div className="pdf-target">
           <ReceiptPrint sale={lastProcessedSale} />
         </div>
-      )}
+      )} */}
     </div>
   );
 }

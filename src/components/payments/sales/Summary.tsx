@@ -170,8 +170,8 @@ const Summary = ({ paidAmount, setPaidAmount, isQuotation, setIsQuotation, handl
                         )}
                     </div>
 
-                    <div className={`flex grid ${isQuotation ? 'grid-cols-1' : 'grid-cols-3'} gap-2 mb-3`}>
-                        <Button
+                    <div className={`flex grid ${isQuotation ? 'grid-cols-1' : 'grid-cols-2'} gap-2 mb-3`}>
+                        {/* <Button
                             variant="primary"
                             className="!bg-gray-100 text-gray-600 hover:!bg-gray-200 !rounded-xl h-11 !shadow-none !text-[10px] !font-black uppercase tracking-wider px-4"
                             onClick={() => generateInvoicePDF(invoiceData)}
@@ -180,7 +180,7 @@ const Summary = ({ paidAmount, setPaidAmount, isQuotation, setIsQuotation, handl
                         >
                             <FileText size={16} color="white" />
                             PDF
-                        </Button>
+                        </Button> */}
                         {!isQuotation && (
                             <Button
                                 variant="primary"
