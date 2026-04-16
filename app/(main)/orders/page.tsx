@@ -291,7 +291,7 @@ export default function OrdersPage() {
     const totalRevenue = useMemo(() =>
         sales
             .filter(s => s.status !== 'quotation')
-            .reduce((acc, curr) => acc + (Number(curr.paidAmount) || 0), 0),
+            .reduce((acc, curr) => Number(acc) + (Number(curr.paidAmount) || 0), 0),
         [sales]);
 
     const totalQuotations = useMemo(() =>

@@ -6,7 +6,7 @@ import { useCart } from "@/src/context/CartContext";
 import { generateInvoicePDF, InvoiceData } from "@/src/services/pdfService";
 
 interface SummaryProps {
-    paidAmount: string;
+    paidAmount: number;
     setPaidAmount: (amount: string) => void;
     isQuotation: boolean;
     setIsQuotation: (isQuotation: boolean) => void;
@@ -48,7 +48,7 @@ const Summary = ({ paidAmount, setPaidAmount, isQuotation, setIsQuotation, handl
         subtotal: subtotal,
         discount: totalDiscount,
         total: cartTotal,
-        paid: parseFloat(paidAmount) || 0,
+        paid: paidAmount || 0,
         balance: balanceAmount
     }
 
@@ -125,7 +125,7 @@ const Summary = ({ paidAmount, setPaidAmount, isQuotation, setIsQuotation, handl
                             <div className="space-y-1">
                                 <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest flex justify-between">
                                     Cash Received
-                                    {parseFloat(paidAmount) !== cartTotal && (
+                                    {paidAmount !== cartTotal && (
                                         <button className="text-primary-600 font-black hover:underline lowercase" onClick={() => setPaidAmount(cartTotal.toString())}>Reset to Full</button>
                                     )}
                                 </label>

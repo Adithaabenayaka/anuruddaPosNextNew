@@ -146,7 +146,7 @@ export default function SalesPage() {
       return;
     }
 
-    const invalidItems = cart.filter(item => parseFloat(item.price) <= item.cost);
+    const invalidItems = cart.filter(item => parseFloat(item.price) <= item.cost - 1);
     if (invalidItems.length > 0) {
       alert(`Some items have selling prices below or equal to their cost. Please adjust them before completing the order.`);
       return;
@@ -161,7 +161,7 @@ export default function SalesPage() {
         customerId: selectedCustomerId || null,
         items: cart,
         total: cartTotal,
-        paidAmount: isQuotation ? 0 : paidAmount,
+        paidAmount: isQuotation ? 0 : parseFloat(paidAmount || "0"),
         balanceAmount: isQuotation ? cartTotal : balanceAmount,
         status: derivedStatus,
       };
@@ -435,7 +435,7 @@ export default function SalesPage() {
 
           {/* Right Side: Order Summary */}
           <Summary
-            paidAmount={paidAmount}
+            paidAmount={parseFloat(paidAmount)}
             setPaidAmount={setPaidAmount}
             buyerName={buyerName}
             address1={address1}
