@@ -29,29 +29,6 @@ const Summary = ({ paidAmount, setPaidAmount, isQuotation, setIsQuotation, handl
         clearCart();
     }
 
-    const totalDiscount = cart.reduce((acc, item) => {
-        const price = parseFloat(item.price);
-        const originalPrice = item.originalPrice || price;
-        const discount = originalPrice > price ? (originalPrice - price) * item.qty : 0;
-        return acc + discount;
-    }, 0);
-
-    const subtotal = cartTotal + totalDiscount;
-
-    const invoiceData: InvoiceData = {
-        customer: {
-            name: buyerName,
-            address1: address1,
-            address2: address2
-        },
-        items: cart,
-        subtotal: subtotal,
-        discount: totalDiscount,
-        total: cartTotal,
-        paid: paidAmount || 0,
-        balance: balanceAmount
-    }
-
     return (
         <div className="lg:col-span-6 sticky top-20">
             <div className="bg-white rounded-lg shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden flex flex-col">

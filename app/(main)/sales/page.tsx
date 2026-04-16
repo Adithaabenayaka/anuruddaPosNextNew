@@ -186,7 +186,8 @@ export default function SalesPage() {
         discount: totalDiscount,
         total: cartTotal - totalDiscount,
         paid: isQuotation ? 0 : parseFloat(paidAmount || "0"),
-        balance: isQuotation ? cartTotal : balanceAmount
+        balance: isQuotation ? cartTotal : balanceAmount,
+        isQuatation: isQuotation
       }
       generateInvoicePDF(invoiveData);
 

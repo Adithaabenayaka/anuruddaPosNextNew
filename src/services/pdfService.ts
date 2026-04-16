@@ -27,6 +27,7 @@ export type InvoiceData = {
     total: number;
     paid: number;
     balance: number;
+    isQuatation: boolean
 };
 
 // =========================
@@ -87,7 +88,12 @@ export const generateInvoicePDF = (data: InvoiceData) => {
     // =========================
     doc.setFontSize(18);
     doc.setFont("helvetica", "bold");
-    doc.text("INVOICE", 20, 55);
+    doc.text(
+        data.isQuatation ? "QUOTATION" : "INVOICE",
+        20,
+        55,
+        { align: "left" }
+    );
 
     // =========================
     // BILL TO
@@ -186,28 +192,38 @@ export const generateInvoicePDF = (data: InvoiceData) => {
     doc.text(formatMoney(Number(data.balance.toFixed(2))), 190, finalY + 36, { align: "right" });
 
     // Bank Details
-    doc.setFont("helvetica", "bold");
-    doc.text("Bank Details", 20, finalY + 10);
+    if (!data.isQuatation) {
+        doc.setFont("helvetica", "bold");
+        doc.text("Bank Details", 20, finalY + 10);
 
-    doc.setFont("helvetica", "normal");
-    doc.text("HD Pemarathna", 20, finalY + 16);
-    doc.text("93563181", 20, finalY + 22);
-    doc.text("Bank of Ceylon - Horana", 20, finalY + 28);
+        doc.setFont("helvetica", "normal");
+        doc.text("HD Pemarathna", 20, finalY + 16);
+        doc.text("93563181", 20, finalY + 22);
+        doc.text("Bank of Ceylon - Horana", 20, finalY + 28);
 
-    // Terms and Conditions
-    doc.setFont("helvetica", "bold");
-    doc.text("TERMS", 20, finalY + 42);
+        // Terms and Conditions
+        doc.setFont("helvetica", "bold");
+        doc.text("TERMS", 20, finalY + 42);
 
-    doc.setFont("helvetica", "normal");
-    doc.text("INVOICE REQUIRED FOR WARRANTY CLAIMS", 20, finalY + 48);
+        doc.setFont("helvetica", "normal");
+        doc.text("INVOICE REQUIRED FOR WARRANTY CLAIMS", 20, finalY + 48);
 
 
-    // =========================
-    // SAVINGS TEXT
-    // =========================
-    doc.setTextColor(0, 128, 0);
-    doc.text(`You saved ${formatMoney(Number(data.discount.toFixed(2)))}`, 140, finalY + 46);
-    doc.setTextColor(0, 0, 0);
+        // =========================
+        // SAVINGS TEXT
+        // =========================
+        doc.setTextColor(0, 128, 0);
+        doc.text(`You saved ${formatMoney(Number(data.discount.toFixed(2)))}`, 140, finalY + 46);
+        doc.setTextColor(0, 0, 0);
+
+    }
+
+    if (data.isQuatation) {
+        doc.setFont("helvetica", "normal");
+        doc.text("Note:", 20, finalY + 30);
+        doc.text("This Quotation valid only for 10 Days from the date of issued", 20, finalY + 36);
+    }
+
 
     // =========================
     // SAVE PDF
