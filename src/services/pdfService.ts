@@ -85,7 +85,7 @@ export const generateInvoicePDF = (data: InvoiceData) => {
 
         doc.setFontSize(10);
         doc.setFont("helvetica", "normal");
-        doc.text("Kotalawala, Bandaragama", 54, 26);
+        doc.text("1/79 Raigam Thuduwa, Bandaragama", 54, 26);
         doc.text("Phone 038 22 91 581", 54, 31);
         doc.text("Mobile 070 62 62 434", 54, 36);
 
