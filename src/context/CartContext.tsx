@@ -83,7 +83,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
                     productId: product.productId,
                     productName: product.productName,
                     price: itemPrice.toString(),
-                    originalPrice: itemPrice !== itemOriginalPrice ? itemOriginalPrice : null,
+                    originalPrice: itemOriginalPrice,
                     catalogPrice: itemPrice,
                     cost: itemCost,
                     qty: 1,

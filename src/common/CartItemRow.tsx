@@ -4,6 +4,7 @@
 import { Minus, Plus, Trash2 } from "lucide-react";
 import { SaleItem } from "@/src/types/sale";
 import { useCart } from "@/src/context/CartContext";
+import { useEffect } from "react";
 
 interface Props {
     item: SaleItem;
@@ -13,6 +14,7 @@ export default function CartItemRow({
     item,
 }: Props) {
     const { updateQty, updatePrice, removeFromCart } = useCart();
+
     return (
         <div className="flex flex-col gap-3 p-4 bg-white md:grid md:grid-cols-12 md:items-center md:gap-4 md:px-6 md:py-3 hover:bg-gray-50/50 border border-gray-300 rounded-xl">
 
@@ -42,7 +44,7 @@ export default function CartItemRow({
             {/* Mobile meta */}
             <div className="md:hidden grid grid-cols-3 gap-2 py-2 border-y border-gray-50 bg-gray-50/50 px-2.5 rounded-xl text-[10px]">
                 <Meta label="Cost" value={`Rs. ${item.cost.toLocaleString()}`} />
-                <Meta label="Orig." value={item.originalPrice ? `Rs. ${item.originalPrice.toLocaleString()}` : '-'} />
+                <Meta label="Orig." value={(item.originalPrice && item.originalPrice !== item.catalogPrice) ? `Rs. ${item.originalPrice.toLocaleString()}` : '-'} />
                 <Meta label="Catalog" value={item.catalogPrice ? `Rs. ${item.catalogPrice.toLocaleString()}` : '-'} />
             </div>
 
@@ -52,7 +54,7 @@ export default function CartItemRow({
             </div>
 
             <div className="hidden md:block md:col-span-1 text-right text-[11px] text-gray-400 font-bold">
-                {item.originalPrice ? `Rs. ${item.originalPrice.toLocaleString()}` : '-'}
+                {(item.originalPrice && item.originalPrice !== item.catalogPrice) ? `Rs. ${item.originalPrice.toLocaleString()}` : '-'}
             </div>
 
             <div className="hidden md:block md:col-span-1 text-right text-[11px] text-primary-500 font-bold">

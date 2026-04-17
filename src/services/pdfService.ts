@@ -53,6 +53,11 @@ export const generateInvoicePDF = (data: InvoiceData) => {
     const logo = new Image();
     logo.src = "/logo.png";
 
+    const totalAmount = data.items.reduce((acc, item) => {
+        const price = toNumber(item.price);
+        return acc + price * item.qty;
+    }, 0);
+
     const totalDiscount = data.items.reduce((acc, item) => {
         const price = toNumber(item.price);
         const discount =
@@ -127,8 +132,8 @@ export const generateInvoicePDF = (data: InvoiceData) => {
             return [
                 item.productName,
                 qty.toString(),
-                (formatMoney(Number(item.originalPrice?.toFixed(2))) || formatMoney(Number(price.toFixed(2)))), // MRP
-                formatMoney(Number(price.toFixed(2))), // Rate
+                formatMoney(Number((item.originalPrice || price).toFixed(2))), // MRP
+                // formatMoney(Number(price.toFixed(2))), // Rate
                 formatMoney(Number(discount.toFixed(2))),
                 formatMoney(Number(amount.toFixed(2))),
             ];
@@ -139,15 +144,14 @@ export const generateInvoicePDF = (data: InvoiceData) => {
             "TOTAL",
             "",
             "",
-            "",
             formatMoney(Number(data.discount.toFixed(2))),
-            formatMoney(Number(data.total.toFixed(2))),
+            formatMoney(Number(totalAmount.toFixed(2))),
         ]);
 
         autoTable(doc, {
             startY: 95,
             margin: { left: 20, right: 20 },
-            head: [["ITEM", "QTY", "MRP", "RATE", "DISCOUNT", "AMOUNT"]],
+            head: [["ITEM", "QTY", "MRP", "DISCOUNT", "AMOUNT"]],
             body: tableBody,
             theme: "plain",
 
@@ -160,7 +164,7 @@ export const generateInvoicePDF = (data: InvoiceData) => {
 
             columnStyles: {
                 0: { halign: "left" },   // ITEM 👈
-                5: { halign: "right" },  // AMOUNT 👈
+                4: { halign: "right" },  // AMOUNT 👈
             },
 
 
@@ -202,8 +206,7 @@ export const generateInvoicePDF = (data: InvoiceData) => {
 
         doc.setFont("helvetica", "bold");
         doc.text("Total", 140, finalY + 10);
-        doc.text(formatMoney(Number(data.total.toFixed(2))), 190, finalY + 10, { align: "right" });
-
+        doc.text(formatMoney(Number(totalAmount.toFixed(2))), 190, finalY + 10, { align: "right" });
 
         // Bank Details
         if (!data.isQuatation) {
@@ -236,6 +239,7 @@ export const generateInvoicePDF = (data: InvoiceData) => {
             // =========================
             // SAVINGS TEXT
             // =========================
+            doc.setFont("helvetica", "bold");
             doc.setTextColor(0, 128, 0);
             doc.text(`You saved ${formatMoney(Number(data.discount.toFixed(2)))}`, 140, finalY + 34);
             doc.setTextColor(0, 0, 0);

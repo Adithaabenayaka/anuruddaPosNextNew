@@ -4,6 +4,7 @@ import Button from "@/src/components/Button";
 import CartItemRow from "@/src/common/CartItemRow";
 import { useCart } from "@/src/context/CartContext";
 import { generateInvoicePDF, InvoiceData } from "@/src/services/pdfService";
+import { useEffect } from "react";
 
 interface SummaryProps {
     paidAmount: number;
@@ -25,6 +26,7 @@ const Summary = ({ paidAmount, setPaidAmount, isQuotation, setIsQuotation, handl
     const { cart, cartTotal, clearCart, removeFromCart } = useCart();
 
 
+    useEffect(() => { console.log(cart) }, [cart])
     const handleCleanCart = () => {
         clearCart();
     }
